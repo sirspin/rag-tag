@@ -28,7 +28,7 @@ function LoginForm() {
     })
 
     if (error) {
-      setError('Something went wrong. Please try again.')
+      setError(error.message || 'Something went wrong. Please try again.')
       setLoading(false)
       return
     }
