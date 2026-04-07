@@ -2,42 +2,39 @@
 create extension if not exists "uuid-ossp";
 
 -- ─── Enums ───────────────────────────────────────────────────────────────────
-create type cadence_type as enum ('weekly', 'biweekly', 'monthly');
-create type tier_type as enum ('free', 'paid');
-create type membership_role as enum ('eic', 'contributor');
-create type membership_status as enum ('invited', 'active');
-create type extraction_status as enum ('pending', 'success', 'paywalled', 'failed');
-create type edition_status as enum ('draft', 'published');
+create type if not exists cadence_type as enum ('weekly', 'biweekly', 'monthly');
+create type if not exists tier_type as enum ('free', 'paid');
+create type if not exists membership_role as enum ('eic', 'contributor');
+create type if not exists membership_status as enum ('invited', 'active');
+create type if not exists extraction_status as enum ('pending', 'success', 'paywalled', 'failed');
+create type if not exists edition_status as enum ('draft', 'published');
 
 -- ─── Tables ───────────────────────────────────────────────────────────────────
 
--- Users (mirrors auth.users, populated via trigger)
-create table public.users (
-  id          uuid primary key references auth.users(id) on delete cascade,
-  email       text not null unique,
-  phone       text,
-  display_name text,
+create table if not exists public.users (
+  id            uuid primary key references auth.users(id) on delete cascade,
+  email         text not null unique,
+  phone         text,
+  display_name  text,
   avatar_initial text,
-  created_at  timestamptz not null default now()
+  created_at    timestamptz not null default now()
 );
 
--- Papers
-create table public.papers (
-  id              uuid primary key default uuid_generate_v4(),
-  slug            text not null unique,
-  name            text not null,
+create table if not exists public.papers (
+  id               uuid primary key default uuid_generate_v4(),
+  slug             text not null unique,
+  name             text not null,
   masthead_tagline text,
-  created_by      uuid not null references public.users(id) on delete restrict,
-  cadence         cadence_type not null default 'weekly',
-  publish_day     int not null default 0 check (publish_day between 0 and 6),
-  publish_time    time not null default '09:00',
-  timezone        text not null default 'America/New_York',
-  tier            tier_type not null default 'free',
-  created_at      timestamptz not null default now()
+  created_by       uuid not null references public.users(id) on delete restrict,
+  cadence          cadence_type not null default 'weekly',
+  publish_day      int not null default 0 check (publish_day between 0 and 6),
+  publish_time     time not null default '09:00',
+  timezone         text not null default 'America/New_York',
+  tier             tier_type not null default 'free',
+  created_at       timestamptz not null default now()
 );
 
--- Memberships
-create table public.memberships (
+create table if not exists public.memberships (
   id          uuid primary key default uuid_generate_v4(),
   paper_id    uuid not null references public.papers(id) on delete cascade,
   user_id     uuid not null references public.users(id) on delete cascade,
@@ -48,8 +45,7 @@ create table public.memberships (
   unique(paper_id, user_id)
 );
 
--- Invites
-create table public.invites (
+create table if not exists public.invites (
   id          uuid primary key default uuid_generate_v4(),
   paper_id    uuid not null references public.papers(id) on delete cascade,
   email       text not null,
@@ -59,8 +55,7 @@ create table public.invites (
   created_at  timestamptz not null default now()
 );
 
--- Editions
-create table public.editions (
+create table if not exists public.editions (
   id              uuid primary key default uuid_generate_v4(),
   paper_id        uuid not null references public.papers(id) on delete cascade,
   edition_number  int not null,
@@ -71,30 +66,29 @@ create table public.editions (
   unique(paper_id, edition_number)
 );
 
--- Submissions
-create table public.submissions (
-  id                 uuid primary key default uuid_generate_v4(),
-  paper_id           uuid not null references public.papers(id) on delete cascade,
-  user_id            uuid not null references public.users(id) on delete cascade,
-  edition_id         uuid references public.editions(id) on delete set null,
-  url                text not null,
-  note               text check (char_length(note) <= 140),
-  og_title           text,
-  og_description     text,
-  og_image           text,
-  og_site_name       text,
-  extracted_text     text,
-  extraction_status  extraction_status not null default 'pending',
-  submitted_at       timestamptz not null default now()
+create table if not exists public.submissions (
+  id                uuid primary key default uuid_generate_v4(),
+  paper_id          uuid not null references public.papers(id) on delete cascade,
+  user_id           uuid not null references public.users(id) on delete cascade,
+  edition_id        uuid references public.editions(id) on delete set null,
+  url               text not null,
+  note              text check (char_length(note) <= 140),
+  og_title          text,
+  og_description    text,
+  og_image          text,
+  og_site_name      text,
+  extracted_text    text,
+  extraction_status extraction_status not null default 'pending',
+  submitted_at      timestamptz not null default now()
 );
 
 -- ─── Indexes ─────────────────────────────────────────────────────────────────
-create index on public.memberships(paper_id);
-create index on public.memberships(user_id);
-create index on public.submissions(paper_id);
-create index on public.submissions(edition_id);
-create index on public.editions(paper_id);
-create index on public.invites(token);
+create index if not exists idx_memberships_paper_id   on public.memberships(paper_id);
+create index if not exists idx_memberships_user_id    on public.memberships(user_id);
+create index if not exists idx_submissions_paper_id   on public.submissions(paper_id);
+create index if not exists idx_submissions_edition_id on public.submissions(edition_id);
+create index if not exists idx_editions_paper_id      on public.editions(paper_id);
+create index if not exists idx_invites_token          on public.invites(token);
 
 -- ─── Trigger: auto-populate users on sign-up ─────────────────────────────────
 create or replace function public.handle_new_user()
@@ -109,7 +103,7 @@ begin
     upper(left(coalesce(new.raw_user_meta_data->>'display_name', new.email), 1))
   )
   on conflict (id) do update
-    set display_name = coalesce(excluded.display_name, public.users.display_name),
+    set display_name   = coalesce(excluded.display_name,   public.users.display_name),
         avatar_initial = coalesce(excluded.avatar_initial, public.users.avatar_initial);
   return new;
 end;
@@ -128,7 +122,11 @@ alter table public.invites     enable row level security;
 alter table public.submissions enable row level security;
 alter table public.editions    enable row level security;
 
--- users: can read/update own row
+-- ─── Policies: users ─────────────────────────────────────────────────────────
+drop policy if exists "Users can view own profile"   on public.users;
+drop policy if exists "Users can update own profile" on public.users;
+drop policy if exists "Users can insert own profile" on public.users;
+
 create policy "Users can view own profile"
   on public.users for select using (auth.uid() = id);
 create policy "Users can update own profile"
@@ -136,14 +134,18 @@ create policy "Users can update own profile"
 create policy "Users can insert own profile"
   on public.users for insert with check (auth.uid() = id);
 
--- papers: members can read; eic can insert/update
+-- ─── Policies: papers ────────────────────────────────────────────────────────
+drop policy if exists "Paper members can view paper" on public.papers;
+drop policy if exists "EIC can create paper"         on public.papers;
+drop policy if exists "EIC can update paper"         on public.papers;
+
 create policy "Paper members can view paper"
   on public.papers for select using (
     exists (
       select 1 from public.memberships m
       where m.paper_id = papers.id
-        and m.user_id = auth.uid()
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.status   = 'active'
     )
   );
 create policy "EIC can create paper"
@@ -153,20 +155,24 @@ create policy "EIC can update paper"
     exists (
       select 1 from public.memberships m
       where m.paper_id = papers.id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 
--- memberships: members can view their own paper's memberships; eic can insert
+-- ─── Policies: memberships ───────────────────────────────────────────────────
+drop policy if exists "Members can view paper memberships" on public.memberships;
+drop policy if exists "EIC can invite contributors"        on public.memberships;
+drop policy if exists "Users can activate own membership"  on public.memberships;
+
 create policy "Members can view paper memberships"
   on public.memberships for select using (
     exists (
       select 1 from public.memberships m
       where m.paper_id = memberships.paper_id
-        and m.user_id = auth.uid()
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.status   = 'active'
     )
   );
 create policy "EIC can invite contributors"
@@ -174,15 +180,19 @@ create policy "EIC can invite contributors"
     exists (
       select 1 from public.memberships m
       where m.paper_id = memberships.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 create policy "Users can activate own membership"
   on public.memberships for update using (user_id = auth.uid());
 
--- invites: public select by token; eic can insert
+-- ─── Policies: invites ───────────────────────────────────────────────────────
+drop policy if exists "Anyone can view invite by token" on public.invites;
+drop policy if exists "EIC can create invites"          on public.invites;
+drop policy if exists "Invite owner can claim"          on public.invites;
+
 create policy "Anyone can view invite by token"
   on public.invites for select using (true);
 create policy "EIC can create invites"
@@ -190,22 +200,26 @@ create policy "EIC can create invites"
     exists (
       select 1 from public.memberships m
       where m.paper_id = invites.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 create policy "Invite owner can claim"
   on public.invites for update using (true);
 
--- submissions: paper members can view; active members/eic can insert
+-- ─── Policies: submissions ───────────────────────────────────────────────────
+drop policy if exists "Paper members can view submissions"      on public.submissions;
+drop policy if exists "Active members can submit"               on public.submissions;
+drop policy if exists "EIC can update submissions (extraction)" on public.submissions;
+
 create policy "Paper members can view submissions"
   on public.submissions for select using (
     exists (
       select 1 from public.memberships m
       where m.paper_id = submissions.paper_id
-        and m.user_id = auth.uid()
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.status   = 'active'
     )
   );
 create policy "Active members can submit"
@@ -214,8 +228,8 @@ create policy "Active members can submit"
     and exists (
       select 1 from public.memberships m
       where m.paper_id = submissions.paper_id
-        and m.user_id = auth.uid()
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.status   = 'active'
     )
   );
 create policy "EIC can update submissions (extraction)"
@@ -223,13 +237,18 @@ create policy "EIC can update submissions (extraction)"
     exists (
       select 1 from public.memberships m
       where m.paper_id = submissions.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 
--- editions: published = public; draft = eic only
+-- ─── Policies: editions ──────────────────────────────────────────────────────
+drop policy if exists "Published editions are public" on public.editions;
+drop policy if exists "EIC can view draft editions"   on public.editions;
+drop policy if exists "EIC can create editions"       on public.editions;
+drop policy if exists "EIC can update editions"       on public.editions;
+
 create policy "Published editions are public"
   on public.editions for select using (status = 'published');
 create policy "EIC can view draft editions"
@@ -238,9 +257,9 @@ create policy "EIC can view draft editions"
     and exists (
       select 1 from public.memberships m
       where m.paper_id = editions.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 create policy "EIC can create editions"
@@ -248,9 +267,9 @@ create policy "EIC can create editions"
     exists (
       select 1 from public.memberships m
       where m.paper_id = editions.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
 create policy "EIC can update editions"
@@ -258,8 +277,8 @@ create policy "EIC can update editions"
     exists (
       select 1 from public.memberships m
       where m.paper_id = editions.paper_id
-        and m.user_id = auth.uid()
-        and m.role = 'eic'
-        and m.status = 'active'
+        and m.user_id  = auth.uid()
+        and m.role     = 'eic'
+        and m.status   = 'active'
     )
   );
