@@ -26,9 +26,11 @@ export async function GET(request: NextRequest) {
   )
 
   if (code) {
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) return NextResponse.redirect(new URL('/auth/login?error=auth_failed', request.url))
   } else if (token_hash && type) {
-    await supabase.auth.verifyOtp({ token_hash, type: type as 'email' })
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as 'email' })
+    if (error) return NextResponse.redirect(new URL('/auth/login?error=auth_failed', request.url))
   }
 
   return NextResponse.redirect(new URL(redirect, request.url))

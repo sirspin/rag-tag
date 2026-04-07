@@ -39,10 +39,14 @@ export default function InvitePage({ params }: { params: { token: string } }) {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user && !claimAttempted.current) {
-        claimAttempted.current = true
-        const savedName = localStorage.getItem('pending_display_name') || ''
-        await callClaimAPI(savedName)
-        return
+        const savedName = localStorage.getItem('pending_display_name')
+        if (savedName !== null) {
+          // Returning after magic link redirect — claim immediately with saved name
+          claimAttempted.current = true
+          await callClaimAPI(savedName)
+          return
+        }
+        // Already logged in but arrived directly — show form so they can enter byline
       }
 
       setLoading(false)
@@ -79,7 +83,14 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     setSending(true)
     setError(null)
 
+    // If already authenticated, claim directly without sending another magic link
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await callClaimAPI(displayName)
+      return
+    }
+
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: data!.invite.email,
       options: {

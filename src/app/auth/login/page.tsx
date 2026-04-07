@@ -12,6 +12,7 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/dashboard'
+  const authError = searchParams.get('error')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,6 +57,11 @@ function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
+      {authError === 'auth_failed' && (
+        <p className="font-garamond italic text-accent text-sm text-center">
+          That link has expired or already been used. Request a new one below.
+        </p>
+      )}
       <div>
         <label className="section-header block mb-3">
           Your email

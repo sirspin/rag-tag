@@ -222,7 +222,7 @@ export default function PaperManagePage({ params }: { params: { id: string } }) 
                       </p>
                     </div>
                     <div className="w-8 h-8 bg-text-primary text-background flex items-center justify-center font-playfair font-bold text-sm">
-                      {user.avatar_initial || user.email[0].toUpperCase()}
+                      {user.avatar_initial || user.email?.[0]?.toUpperCase() || '?'}
                     </div>
                   </div>
                 ))}

@@ -135,9 +135,9 @@ export async function POST(request: NextRequest) {
     aiSections = await compileEdition(paper.name, editionNumber, updatedSubmissions)
   } catch (err) {
     console.error('AI compilation error:', err)
-    // Delete draft edition and return error
-    await serviceSupabase.from('editions').delete().eq('id', edition.id)
+    // Clear FK references first, then delete draft edition
     await serviceSupabase.from('submissions').update({ edition_id: null }).eq('edition_id', edition.id)
+    await serviceSupabase.from('editions').delete().eq('id', edition.id)
     return NextResponse.json({ error: 'AI compilation failed. Please try again.' }, { status: 500 })
   }
 
