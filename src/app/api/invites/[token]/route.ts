@@ -5,7 +5,7 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: { token: string } }
 ) {
-  const supabase = await createServiceClient()
+  const supabase = createServiceClient()
 
   const { data: invite } = await supabase
     .from('invites')

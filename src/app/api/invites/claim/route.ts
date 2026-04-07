@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 })
   }
 
-  const service = await createServiceClient()
+  const service = createServiceClient()
 
   // Fetch invite
   const { data: invite } = await service

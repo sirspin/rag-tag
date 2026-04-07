@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 })
 
-  const service = await createServiceClient()
+  const service = createServiceClient()
 
   // Upsert user profile (in case trigger hasn't run)
   await service.from('users').upsert({ id: user.id, email: user.email! }, { onConflict: 'id' })

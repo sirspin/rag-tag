@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Only the EIC can publish editions.' }, { status: 403 })
   }
 
-  const serviceSupabase = await createServiceClient()
+  const serviceSupabase = createServiceClient()
 
   const { error } = await serviceSupabase
     .from('editions')

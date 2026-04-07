@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Enrich with user data
-  const serviceSupabase = await createServiceClient()
+  const serviceSupabase = createServiceClient()
   const submissions: SubmissionWithUser[] = []
 
   for (const sub of rawSubmissions) {

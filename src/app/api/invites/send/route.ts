@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   const token = crypto.randomUUID()
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const serviceSupabase = await createServiceClient()
+  const serviceSupabase = createServiceClient()
 
   const { error: inviteError } = await serviceSupabase.from('invites').insert({
     paper_id,
