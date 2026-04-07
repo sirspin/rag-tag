@@ -139,6 +139,28 @@ alter table public.invites     enable row level security;
 alter table public.submissions enable row level security;
 alter table public.editions    enable row level security;
 
+-- ─── RLS helper functions (security definer = bypasses RLS, avoids recursion) ─
+create or replace function public.is_paper_member(p_paper_id uuid)
+returns boolean language sql security definer stable as $$
+  select exists (
+    select 1 from public.memberships
+    where paper_id = p_paper_id
+      and user_id  = auth.uid()
+      and status   = 'active'
+  );
+$$;
+
+create or replace function public.is_paper_eic(p_paper_id uuid)
+returns boolean language sql security definer stable as $$
+  select exists (
+    select 1 from public.memberships
+    where paper_id = p_paper_id
+      and user_id  = auth.uid()
+      and role     = 'eic'
+      and status   = 'active'
+  );
+$$;
+
 -- ─── Policies: users ─────────────────────────────────────────────────────────
 drop policy if exists "Users can view own profile"   on public.users;
 drop policy if exists "Users can update own profile" on public.users;
@@ -157,26 +179,11 @@ drop policy if exists "EIC can create paper"         on public.papers;
 drop policy if exists "EIC can update paper"         on public.papers;
 
 create policy "Paper members can view paper"
-  on public.papers for select using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = papers.id
-        and m.user_id  = auth.uid()
-        and m.status   = 'active'
-    )
-  );
+  on public.papers for select using (public.is_paper_member(id));
 create policy "EIC can create paper"
   on public.papers for insert with check (created_by = auth.uid());
 create policy "EIC can update paper"
-  on public.papers for update using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = papers.id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.papers for update using (public.is_paper_eic(id));
 
 -- ─── Policies: memberships ───────────────────────────────────────────────────
 drop policy if exists "Members can view paper memberships" on public.memberships;
@@ -184,24 +191,9 @@ drop policy if exists "EIC can invite contributors"        on public.memberships
 drop policy if exists "Users can activate own membership"  on public.memberships;
 
 create policy "Members can view paper memberships"
-  on public.memberships for select using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = memberships.paper_id
-        and m.user_id  = auth.uid()
-        and m.status   = 'active'
-    )
-  );
+  on public.memberships for select using (public.is_paper_member(paper_id));
 create policy "EIC can invite contributors"
-  on public.memberships for insert with check (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = memberships.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.memberships for insert with check (public.is_paper_eic(paper_id));
 create policy "Users can activate own membership"
   on public.memberships for update using (user_id = auth.uid());
 
@@ -213,15 +205,7 @@ drop policy if exists "Invite owner can claim"          on public.invites;
 create policy "Anyone can view invite by token"
   on public.invites for select using (true);
 create policy "EIC can create invites"
-  on public.invites for insert with check (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = invites.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.invites for insert with check (public.is_paper_eic(paper_id));
 create policy "Invite owner can claim"
   on public.invites for update using (true);
 
@@ -231,34 +215,13 @@ drop policy if exists "Active members can submit"               on public.submis
 drop policy if exists "EIC can update submissions (extraction)" on public.submissions;
 
 create policy "Paper members can view submissions"
-  on public.submissions for select using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = submissions.paper_id
-        and m.user_id  = auth.uid()
-        and m.status   = 'active'
-    )
-  );
+  on public.submissions for select using (public.is_paper_member(paper_id));
 create policy "Active members can submit"
   on public.submissions for insert with check (
-    user_id = auth.uid()
-    and exists (
-      select 1 from public.memberships m
-      where m.paper_id = submissions.paper_id
-        and m.user_id  = auth.uid()
-        and m.status   = 'active'
-    )
+    user_id = auth.uid() and public.is_paper_member(paper_id)
   );
 create policy "EIC can update submissions (extraction)"
-  on public.submissions for update using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = submissions.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.submissions for update using (public.is_paper_eic(paper_id));
 
 -- ─── Policies: editions ──────────────────────────────────────────────────────
 drop policy if exists "Published editions are public" on public.editions;
@@ -270,32 +233,9 @@ create policy "Published editions are public"
   on public.editions for select using (status = 'published');
 create policy "EIC can view draft editions"
   on public.editions for select using (
-    status = 'draft'
-    and exists (
-      select 1 from public.memberships m
-      where m.paper_id = editions.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
+    status = 'draft' and public.is_paper_eic(paper_id)
   );
 create policy "EIC can create editions"
-  on public.editions for insert with check (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = editions.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.editions for insert with check (public.is_paper_eic(paper_id));
 create policy "EIC can update editions"
-  on public.editions for update using (
-    exists (
-      select 1 from public.memberships m
-      where m.paper_id = editions.paper_id
-        and m.user_id  = auth.uid()
-        and m.role     = 'eic'
-        and m.status   = 'active'
-    )
-  );
+  on public.editions for update using (public.is_paper_eic(paper_id));
