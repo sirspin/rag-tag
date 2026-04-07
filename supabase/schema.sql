@@ -163,11 +163,12 @@ $$;
 
 -- ─── Policies: users ─────────────────────────────────────────────────────────
 drop policy if exists "Users can view own profile"   on public.users;
+drop policy if exists "Users can view profiles"      on public.users;
 drop policy if exists "Users can update own profile" on public.users;
 drop policy if exists "Users can insert own profile" on public.users;
 
-create policy "Users can view own profile"
-  on public.users for select using (auth.uid() = id);
+create policy "Users can view profiles"
+  on public.users for select using (auth.uid() is not null);
 create policy "Users can update own profile"
   on public.users for update using (auth.uid() = id);
 create policy "Users can insert own profile"

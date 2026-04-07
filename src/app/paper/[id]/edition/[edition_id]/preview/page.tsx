@@ -49,6 +49,9 @@ export default async function PreviewPage({
 
   if (!edition || !edition.ai_sections) notFound()
 
+  const aiSections = edition.ai_sections as import("@/types").AISections
+  if (!aiSections?.sections) notFound()
+
   // Get submissions
   const { data: rawSubmissions } = await supabase
     .from('submissions')
@@ -90,8 +93,6 @@ export default async function PreviewPage({
       if (u) contributors.push(u)
     }
   }
-
-  const aiSections = edition.ai_sections as import("@/types").AISections
 
   return (
     <div className="bg-background min-h-screen">

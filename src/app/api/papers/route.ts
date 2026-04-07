@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
+  try {
   const body = await request.json()
   const { slug, name, masthead_tagline, cadence, publish_day, publish_time, timezone } = body
 
@@ -49,4 +50,8 @@ export async function POST(request: NextRequest) {
   if (memberErr) return NextResponse.json({ error: memberErr.message }, { status: 500 })
 
   return NextResponse.json({ paper_id: paper.id })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unexpected error'
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }
