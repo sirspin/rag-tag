@@ -1,113 +1,87 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import type { InviteRow, PaperRow } from '@/types'
+
+type InviteData = {
+  invite: { id: string; paper_id: string; email: string; expires_at: string; claimed_by: string | null }
+  paper: { id: string; name: string; masthead_tagline: string | null }
+}
 
 export default function InvitePage({ params }: { params: { token: string } }) {
   const router = useRouter()
-  const [invite, setInvite] = useState<InviteRow | null>(null)
-  const [paper, setPaper] = useState<PaperRow | null>(null)
+  const [data, setData] = useState<InviteData | null>(null)
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(true)
+  const [claiming, setClaiming] = useState(false)
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [expired, setExpired] = useState(false)
+  const claimAttempted = useRef(false)
 
   useEffect(() => {
     async function load() {
+      // 1. Load invite + paper via public service-client API (no auth required)
+      const res = await fetch(`/api/invites/${params.token}`)
+      const json = await res.json()
+
+      if (!res.ok) {
+        setError(json.error || 'Invalid invitation.')
+        setLoading(false)
+        return
+      }
+
+      setData(json)
+
+      // 2. If already authenticated (returning after magic link), claim immediately
       const supabase = createClient()
-
-      // Check if already logged in
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        // Claim the invite directly
-        await claimInvite(user.id, supabase)
+
+      if (user && !claimAttempted.current) {
+        claimAttempted.current = true
+        const savedName = localStorage.getItem('pending_display_name') || ''
+        await callClaimAPI(savedName)
         return
       }
 
-      const { data: inviteData } = await supabase
-        .from('invites')
-        .select('*')
-        .eq('token', params.token)
-        .single()
-
-      if (!inviteData) {
-        setError('This invitation link is invalid or has already been used.')
-        setLoading(false)
-        return
-      }
-
-      if (new Date(inviteData.expires_at) < new Date()) {
-        setExpired(true)
-        setLoading(false)
-        return
-      }
-
-      if (inviteData.claimed_by) {
-        setError('This invitation has already been claimed.')
-        setLoading(false)
-        return
-      }
-
-      setInvite(inviteData)
-
-      const { data: paperData } = await supabase
-        .from('papers')
-        .select('*')
-        .eq('id', inviteData.paper_id)
-        .single()
-
-      setPaper(paperData)
       setLoading(false)
     }
+
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.token])
 
-  async function claimInvite(userId: string, supabase: ReturnType<typeof createClient>) {
-    // Mark invite as claimed
-    await supabase.from('invites').update({ claimed_by: userId }).eq('token', params.token)
+  async function callClaimAPI(name: string) {
+    setClaiming(true)
+    const res = await fetch('/api/invites/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: params.token, display_name: name }),
+    })
+    const json = await res.json()
 
-    // Get invite details
-    const { data: inviteData } = await supabase.from('invites').select('*').eq('token', params.token).single()
-    if (!inviteData) return
+    localStorage.removeItem('pending_display_name')
+    localStorage.removeItem('pending_invite_token')
 
-    // Check if membership exists
-    const { data: existing } = await supabase
-      .from('memberships')
-      .select('*')
-      .eq('paper_id', inviteData.paper_id)
-      .eq('user_id', userId)
-      .single()
-
-    if (!existing) {
-      await supabase.from('memberships').insert({
-        paper_id: inviteData.paper_id,
-        user_id: userId,
-        role: 'contributor',
-        status: 'active',
-        joined_at: new Date().toISOString(),
-      })
-    } else if (existing.status === 'invited') {
-      await supabase.from('memberships').update({ status: 'active', joined_at: new Date().toISOString() }).eq('id', existing.id)
+    if (!res.ok) {
+      setError(json.error || 'Failed to claim invite.')
+      setClaiming(false)
+      setLoading(false)
+      return
     }
 
-    router.push(`/paper/${inviteData.paper_id}/submit`)
+    router.push(`/paper/${json.paper_id}/submit`)
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setSending(true)
+    setError(null)
 
     const supabase = createClient()
-
-    // Update user metadata with display name so the trigger stores it
-    // Send magic link
     const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: invite!.email,
+      email: data!.invite.email,
       options: {
         data: { display_name: displayName },
         emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(`/invite/${params.token}`)}`,
@@ -115,15 +89,12 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     })
 
     if (otpError) {
-      setError('Failed to send magic link. Please try again.')
+      setError('Failed to send sign-in link. Please try again.')
       setSending(false)
       return
     }
 
-    // Store display name in invite for post-claim
-    await supabase.from('invites').update({}).eq('token', params.token)
-
-    // Store display_name in localStorage so we can upsert after callback
+    // Persist display name — read back after auth redirect
     localStorage.setItem('pending_display_name', displayName)
     localStorage.setItem('pending_invite_token', params.token)
 
@@ -131,23 +102,23 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     setSending(false)
   }
 
-  if (loading) {
+  if (loading || claiming) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center">
-        <p className="font-garamond italic text-text-secondary">Loading…</p>
+        <p className="font-garamond italic text-text-secondary">
+          {claiming ? 'Claiming your byline\u2026' : 'Loading\u2026'}
+        </p>
       </div>
     )
   }
 
-  if (error || expired) {
+  if (error) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <h1 className="masthead-name text-4xl mb-4">Commonplace</h1>
           <hr className="rule-thin mb-6" />
-          <p className="font-garamond italic text-text-secondary text-lg">
-            {expired ? 'This invitation has expired.' : error}
-          </p>
+          <p className="font-garamond italic text-text-secondary text-lg">{error}</p>
         </div>
       </div>
     )
@@ -163,7 +134,8 @@ export default function InvitePage({ params }: { params: { token: string } }) {
             Check your inbox.
           </p>
           <p className="font-garamond text-text-secondary">
-            A sign-in link is on its way to <strong className="text-text-primary not-italic">{invite?.email}</strong>.
+            A sign-in link is on its way to{' '}
+            <strong className="text-text-primary not-italic">{data?.invite.email}</strong>.
             Click it to claim your byline.
           </p>
         </div>
@@ -186,11 +158,11 @@ export default function InvitePage({ params }: { params: { token: string } }) {
         <div className="mb-8">
           <p className="section-header mb-2">You&rsquo;re invited</p>
           <p className="font-playfair font-bold text-2xl text-text-primary mb-1">
-            {paper?.name}
+            {data?.paper.name}
           </p>
-          {paper?.masthead_tagline && (
+          {data?.paper.masthead_tagline && (
             <p className="font-garamond italic text-text-secondary">
-              &ldquo;{paper.masthead_tagline}&rdquo;
+              &ldquo;{data.paper.masthead_tagline}&rdquo;
             </p>
           )}
         </div>
@@ -199,7 +171,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <p className="font-garamond text-text-secondary">
-            You&rsquo;re joining as a contributor. Your submissions will appear as your byline in every edition.
+            You&rsquo;re joining as a contributor. Your byline appears next to every submission you make.
           </p>
 
           <div>
@@ -209,7 +181,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
               required
               value={displayName}
               onChange={e => setDisplayName(e.target.value)}
-              placeholder='e.g. "Alex R." or "The Sports Desk"'
+              placeholder='e.g. "Alex R." or "The Culture Desk"'
               className="input-editorial text-lg"
               maxLength={60}
               autoFocus
@@ -219,12 +191,16 @@ export default function InvitePage({ params }: { params: { token: string } }) {
             </p>
           </div>
 
-          <button type="submit" disabled={sending || !displayName.trim()} className="btn-primary w-full">
-            {sending ? 'Sending link…' : 'Claim my byline →'}
+          <button
+            type="submit"
+            disabled={sending || !displayName.trim()}
+            className="btn-primary w-full"
+          >
+            {sending ? 'Sending link\u2026' : 'Claim my byline \u2192'}
           </button>
 
           <p className="font-garamond italic text-text-secondary text-sm text-center">
-            We&rsquo;ll send a sign-in link to {invite?.email}
+            We&rsquo;ll send a sign-in link to {data?.invite.email}
           </p>
         </form>
       </div>
