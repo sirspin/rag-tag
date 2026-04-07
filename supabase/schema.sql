@@ -1,23 +1,40 @@
 -- ─── Extensions ──────────────────────────────────────────────────────────────
 create extension if not exists "uuid-ossp";
 
--- ─── Enums ───────────────────────────────────────────────────────────────────
-create type if not exists cadence_type as enum ('weekly', 'biweekly', 'monthly');
-create type if not exists tier_type as enum ('free', 'paid');
-create type if not exists membership_role as enum ('eic', 'contributor');
-create type if not exists membership_status as enum ('invited', 'active');
-create type if not exists extraction_status as enum ('pending', 'success', 'paywalled', 'failed');
-create type if not exists edition_status as enum ('draft', 'published');
+-- ─── Enums (safe to re-run) ───────────────────────────────────────────────────
+do $$ begin
+  create type cadence_type as enum ('weekly', 'biweekly', 'monthly');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type tier_type as enum ('free', 'paid');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type membership_role as enum ('eic', 'contributor');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type membership_status as enum ('invited', 'active');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type extraction_status as enum ('pending', 'success', 'paywalled', 'failed');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type edition_status as enum ('draft', 'published');
+exception when duplicate_object then null; end $$;
 
 -- ─── Tables ───────────────────────────────────────────────────────────────────
 
 create table if not exists public.users (
-  id            uuid primary key references auth.users(id) on delete cascade,
-  email         text not null unique,
-  phone         text,
-  display_name  text,
+  id             uuid primary key references auth.users(id) on delete cascade,
+  email          text not null unique,
+  phone          text,
+  display_name   text,
   avatar_initial text,
-  created_at    timestamptz not null default now()
+  created_at     timestamptz not null default now()
 );
 
 create table if not exists public.papers (
@@ -35,34 +52,34 @@ create table if not exists public.papers (
 );
 
 create table if not exists public.memberships (
-  id          uuid primary key default uuid_generate_v4(),
-  paper_id    uuid not null references public.papers(id) on delete cascade,
-  user_id     uuid not null references public.users(id) on delete cascade,
-  role        membership_role not null,
-  status      membership_status not null default 'invited',
-  invited_at  timestamptz not null default now(),
-  joined_at   timestamptz,
+  id         uuid primary key default uuid_generate_v4(),
+  paper_id   uuid not null references public.papers(id) on delete cascade,
+  user_id    uuid not null references public.users(id) on delete cascade,
+  role       membership_role not null,
+  status     membership_status not null default 'invited',
+  invited_at timestamptz not null default now(),
+  joined_at  timestamptz,
   unique(paper_id, user_id)
 );
 
 create table if not exists public.invites (
-  id          uuid primary key default uuid_generate_v4(),
-  paper_id    uuid not null references public.papers(id) on delete cascade,
-  email       text not null,
-  token       text not null unique,
-  claimed_by  uuid references public.users(id) on delete set null,
-  expires_at  timestamptz not null,
-  created_at  timestamptz not null default now()
+  id         uuid primary key default uuid_generate_v4(),
+  paper_id   uuid not null references public.papers(id) on delete cascade,
+  email      text not null,
+  token      text not null unique,
+  claimed_by uuid references public.users(id) on delete set null,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
 );
 
 create table if not exists public.editions (
-  id              uuid primary key default uuid_generate_v4(),
-  paper_id        uuid not null references public.papers(id) on delete cascade,
-  edition_number  int not null,
-  publish_at      timestamptz,
-  status          edition_status not null default 'draft',
-  ai_sections     jsonb,
-  created_at      timestamptz not null default now(),
+  id             uuid primary key default uuid_generate_v4(),
+  paper_id       uuid not null references public.papers(id) on delete cascade,
+  edition_number int not null,
+  publish_at     timestamptz,
+  status         edition_status not null default 'draft',
+  ai_sections    jsonb,
+  created_at     timestamptz not null default now(),
   unique(paper_id, edition_number)
 );
 
