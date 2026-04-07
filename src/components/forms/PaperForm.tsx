@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 
 const TIMEZONES = [
   'America/New_York',
@@ -55,55 +54,27 @@ export default function PaperForm() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login'); return }
-
-    // Upsert user profile first (in case trigger hasn't run)
-    await supabase.from('users').upsert({ id: user.id, email: user.email! }, { onConflict: 'id' })
-
-    // Create paper
-    const { data: paper, error: paperErr } = await supabase
-      .from('papers')
-      .insert({
+    const res = await fetch('/api/papers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         slug,
         name,
-        masthead_tagline: tagline || null,
-        created_by: user.id,
+        masthead_tagline: tagline,
         cadence,
         publish_day: publishDay,
         publish_time: publishTime,
         timezone,
-      })
-      .select()
-      .single()
-
-    if (paperErr) {
-      if (paperErr.code === '23505') {
-        setError(`The slug "${slug}" is already taken. Try a different paper name.`)
-      } else {
-        setError('Something went wrong. Please try again.')
-      }
-      setLoading(false)
-      return
-    }
-
-    // Create EIC membership
-    const { error: memberErr } = await supabase.from('memberships').insert({
-      paper_id: paper.id,
-      user_id: user.id,
-      role: 'eic',
-      status: 'active',
-      joined_at: new Date().toISOString(),
+      }),
     })
-
-    if (memberErr) {
-      setError('Paper created but membership setup failed. Contact support.')
+    const data = await res.json()
+    if (!res.ok) {
+      setError(data.error || 'Something went wrong. Please try again.')
       setLoading(false)
       return
     }
 
-    router.push(`/paper/${paper.id}`)
+    router.push(`/paper/${data.paper_id}`)
   }
 
   return (
