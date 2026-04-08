@@ -24,7 +24,7 @@ export default function BriefSection({
         <p className="section-header text-accent mb-1">{section.title}</p>
         <hr className="rule-thin mb-3" />
         {section.lede && (
-          <p className="font-garamond italic text-text-secondary leading-relaxed">
+          <p className="font-quattrocento italic text-text-secondary leading-relaxed">
             {section.lede}
           </p>
         )}
@@ -34,7 +34,7 @@ export default function BriefSection({
       <div className="space-y-5">
         {sectionSubmissions.map((sub, i) => (
           <div key={sub.id} className={i > 0 ? 'pt-5 border-t border-rules/20' : ''}>
-            <h3 className="font-playfair font-bold text-lg text-text-primary leading-tight mb-1">
+            <h3 className="font-quattrocento font-bold text-lg text-text-primary leading-tight mb-1">
               <a
                 href={sub.url}
                 target="_blank"
@@ -44,13 +44,13 @@ export default function BriefSection({
                 {sub.og_title || sub.url}
               </a>
             </h3>
-            <p className="font-garamond italic text-text-secondary text-sm">
+            <p className="font-arvo text-xs text-text-secondary not-italic">
               by {sub.user?.display_name || 'A contributor'}
               &nbsp;&middot;&nbsp;
-              <span className="font-courier not-italic text-xs">{getSiteName(sub)}</span>
+              <span>{getSiteName(sub)}</span>
             </p>
             {sub.note && (
-              <p className="font-garamond italic text-text-secondary text-sm mt-1">
+              <p className="font-quattrocento italic text-text-secondary text-sm mt-1">
                 &ldquo;{sub.note}&rdquo;
               </p>
             )}

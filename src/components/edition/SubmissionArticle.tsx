@@ -21,8 +21,7 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
           href={submission.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="continue-reading not-italic"
-          style={{ fontStyle: 'italic' }}
+          className="continue-reading"
         >
           Continue reading at {siteName} →
         </a>
@@ -34,12 +33,12 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
   return (
     <div>
       {submission.og_description && (
-        <p className="font-lora text-text-secondary leading-relaxed mb-4">
+        <p className="font-quattrocento text-text-secondary leading-relaxed mb-4">
           {submission.og_description}
         </p>
       )}
       {!submission.og_description && submission.extraction_status === 'paywalled' && (
-        <p className="font-garamond italic text-text-secondary mb-4">
+        <p className="font-quattrocento italic text-text-secondary mb-4">
           This article is behind a paywall.
         </p>
       )}
@@ -48,7 +47,6 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
         target="_blank"
         rel="noopener noreferrer"
         className="continue-reading"
-        style={{ fontStyle: 'italic' }}
       >
         Read the full story at {siteName} →
       </a>

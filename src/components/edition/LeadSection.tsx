@@ -27,7 +27,7 @@ export default function LeadSection({
         <p className="section-header text-accent mb-1">{section.title}</p>
         <hr className="rule-thin mb-3" />
         {section.lede && (
-          <p className="font-garamond italic text-text-secondary text-lg leading-relaxed">
+          <p className="font-quattrocento italic text-text-secondary text-lg leading-relaxed">
             {section.lede}
           </p>
         )}
@@ -42,7 +42,7 @@ export default function LeadSection({
             <img
               src={primary.og_image}
               alt={primary.og_title || ''}
-              className="w-full h-64 md:h-80 object-cover mb-6"
+              className="w-full h-72 md:h-96 object-cover mb-6"
               loading="lazy"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
@@ -50,8 +50,8 @@ export default function LeadSection({
 
           {/* Headline */}
           <h2
-            className="font-playfair font-bold text-text-primary leading-tight mb-2"
-            style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)' }}
+            className="font-quattrocento font-bold text-text-primary leading-tight mb-2"
+            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
           >
             <a
               href={primary.url}
@@ -64,10 +64,10 @@ export default function LeadSection({
           </h2>
 
           {/* Byline */}
-          <p className="font-garamond italic text-text-secondary text-sm mb-4">
+          <p className="font-arvo text-xs text-text-secondary not-italic mb-4">
             by {primary.user?.display_name || 'A contributor'}
             &nbsp;&middot;&nbsp;
-            <span className="font-courier not-italic text-xs">{getSiteName(primary)}</span>
+            <span>{getSiteName(primary)}</span>
           </p>
 
           {/* Pull quote — contributor's note */}
@@ -92,21 +92,21 @@ export default function LeadSection({
                 <img
                   src={sub.og_image}
                   alt={sub.og_title || ''}
-                  className="w-full h-40 object-cover mb-4"
+                  className="w-full h-48 object-cover mb-4"
                   loading="lazy"
                   onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
               )}
-              <h3 className="font-playfair font-bold text-xl text-text-primary leading-tight mb-1">
+              <h3 className="font-quattrocento font-bold text-xl text-text-primary leading-tight mb-1">
                 <a href={sub.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent">
                   {sub.og_title || sub.url}
                 </a>
               </h3>
-              <p className="font-garamond italic text-text-secondary text-sm mb-3">
+              <p className="font-arvo text-xs text-text-secondary not-italic mb-3">
                 by {sub.user?.display_name || 'A contributor'}
               </p>
               {sub.note && (
-                <p className="font-garamond italic text-text-secondary text-sm border-l-2 border-accent pl-3 mb-3">
+                <p className="font-quattrocento italic text-text-secondary text-sm border-l-2 border-accent pl-3 mb-3">
                   &ldquo;{sub.note}&rdquo;
                 </p>
               )}

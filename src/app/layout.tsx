@@ -1,36 +1,19 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, Lora, EB_Garamond, Courier_Prime } from 'next/font/google'
+import { Quattrocento, Arvo } from 'next/font/google'
 import './globals.css'
 
-const playfair = Playfair_Display({
+const quattrocento = Quattrocento({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  style: ['normal', 'italic'],
-  variable: '--font-playfair',
+  weight: ['400', '700'],
+  variable: '--font-quattrocento',
   display: 'swap',
 })
 
-const lora = Lora({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-lora',
-  display: 'swap',
-})
-
-const garamond = EB_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  style: ['normal', 'italic'],
-  variable: '--font-garamond',
-  display: 'swap',
-})
-
-const courier = Courier_Prime({
+const arvo = Arvo({
   subsets: ['latin'],
   weight: ['400', '700'],
   style: ['normal', 'italic'],
-  variable: '--font-courier',
+  variable: '--font-arvo',
   display: 'swap',
 })
 
@@ -48,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${lora.variable} ${garamond.variable} ${courier.variable}`}
+      className={`${quattrocento.variable} ${arvo.variable}`}
     >
       <body>{children}</body>
     </html>

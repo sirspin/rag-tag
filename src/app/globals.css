@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --background: #F5F0E8;
-  --text-primary: #1A1209;
+  --background: #F2EDE3;
+  --text-primary: #181008;
   --text-secondary: #5C4A2A;
   --rules: #2A1F0E;
-  --accent: #8B0000;
-  --link-color: #1A1209;
+  --accent: #E5243A;
+  --link-color: #181008;
 }
 
 html {
@@ -18,7 +18,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--text-primary);
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-quattrocento), Georgia, serif;
   -webkit-font-smoothing: antialiased;
   position: relative;
 }
@@ -63,10 +63,13 @@ a:hover {
 }
 
 /* Typography utilities */
-.font-playfair { font-family: var(--font-playfair), Georgia, serif; }
-.font-lora { font-family: var(--font-lora), Georgia, serif; }
-.font-garamond { font-family: var(--font-garamond), Georgia, serif; }
-.font-courier { font-family: var(--font-courier), 'Courier New', monospace; }
+.font-quattrocento { font-family: var(--font-quattrocento), Georgia, serif; }
+.font-arvo { font-family: var(--font-arvo), Georgia, serif; }
+/* backward-compat aliases */
+.font-playfair { font-family: var(--font-quattrocento), Georgia, serif; }
+.font-lora { font-family: var(--font-quattrocento), Georgia, serif; }
+.font-garamond { font-family: var(--font-quattrocento), Georgia, serif; }
+.font-courier { font-family: var(--font-arvo), Georgia, serif; }
 
 .small-caps {
   font-variant: small-caps;
@@ -75,7 +78,7 @@ a:hover {
 
 /* Editorial prose */
 .prose-editorial p {
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-quattrocento), Georgia, serif;
   font-size: 1rem;
   line-height: 1.75;
   color: var(--text-primary);
@@ -84,18 +87,18 @@ a:hover {
 
 .prose-editorial p:first-child::first-letter {
   float: left;
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-quattrocento), Georgia, serif;
   font-size: 3.5em;
   line-height: 0.8;
   padding-right: 0.08em;
   padding-top: 0.1em;
-  font-weight: 900;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
 /* Pull quote */
 .pull-quote {
-  font-family: var(--font-garamond), Georgia, serif;
+  font-family: var(--font-quattrocento), Georgia, serif;
   font-style: italic;
   font-size: 1.15rem;
   color: var(--text-secondary);
@@ -105,19 +108,19 @@ a:hover {
   line-height: 1.6;
 }
 
-/* Section header in small caps */
+/* Section kicker — Arvo uppercase label */
 .section-header {
-  font-family: var(--font-garamond), Georgia, serif;
-  font-variant: small-caps;
-  letter-spacing: 0.12em;
-  font-size: 0.85rem;
+  font-family: var(--font-arvo), Georgia, serif;
+  font-variant: normal;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   text-transform: uppercase;
 }
 
-/* Continue reading link */
+/* Continue reading link — Arvo italic */
 .continue-reading {
-  font-family: var(--font-garamond), Georgia, serif;
+  font-family: var(--font-arvo), Georgia, serif;
   font-style: italic;
   font-size: 0.9rem;
   color: var(--text-secondary);
@@ -130,11 +133,11 @@ a:hover {
   text-decoration: none;
 }
 
-/* Edition badge */
+/* Edition badge — Arvo structural */
 .edition-badge {
-  font-family: var(--font-courier), 'Courier New', monospace;
+  font-family: var(--font-arvo), Georgia, serif;
   font-size: 0.7rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   color: var(--text-secondary);
 }
 
@@ -146,7 +149,7 @@ a:hover {
   border-radius: 0;
   padding: 0.5rem 0;
   width: 100%;
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-quattrocento), Georgia, serif;
   color: var(--text-primary);
   font-size: 1rem;
   outline: none;
@@ -162,11 +165,11 @@ a:hover {
   font-style: italic;
 }
 
-/* Button editorial style */
+/* Button editorial style — Arvo structural */
 .btn-primary {
   background: var(--text-primary);
   color: var(--background);
-  font-family: var(--font-garamond), Georgia, serif;
+  font-family: var(--font-arvo), Georgia, serif;
   font-variant: small-caps;
   letter-spacing: 0.1em;
   padding: 0.75rem 2rem;
@@ -186,7 +189,7 @@ a:hover {
 .btn-secondary {
   background: transparent;
   color: var(--text-primary);
-  font-family: var(--font-garamond), Georgia, serif;
+  font-family: var(--font-arvo), Georgia, serif;
   font-variant: small-caps;
   letter-spacing: 0.1em;
   padding: 0.75rem 2rem;
@@ -200,10 +203,10 @@ a:hover {
   color: var(--background);
 }
 
-/* Masthead */
+/* Masthead — Quattrocento bold */
 .masthead-name {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-weight: 900;
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--text-primary);
   line-height: 0.95;

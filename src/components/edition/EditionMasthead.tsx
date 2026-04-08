@@ -20,13 +20,16 @@ export default function EditionMasthead({
   const publishDate = edition.publish_at ? formatDate(edition.publish_at) : formatDate(edition.created_at)
   const editionBadge = `Edition #${String(edition.edition_number).padStart(4, '0')}`
 
+  // contributors prop retained for API compatibility but not rendered
+  void contributors
+
   return (
     <header className="text-center mb-0">
       {/* Top thin rule */}
       <hr className="rule-thin mb-3" />
 
       {/* Vol / date / edition line */}
-      <p className="edition-badge text-text-secondary mb-3">
+      <p className="font-arvo text-xs tracking-widest text-text-secondary mb-3">
         Vol. 1 &nbsp;&middot;&nbsp; {publishDate} &nbsp;&middot;&nbsp; {editionBadge}
       </p>
 
@@ -37,7 +40,7 @@ export default function EditionMasthead({
       <h1
         className="masthead-name text-center leading-none mb-4"
         style={{
-          fontSize: 'clamp(3rem, 8vw, 6rem)',
+          fontSize: 'clamp(3.5rem, 9vw, 7rem)',
           letterSpacing: '0.04em',
         }}
       >
@@ -47,17 +50,10 @@ export default function EditionMasthead({
       {/* Tagline */}
       {paper.masthead_tagline && (
         <p
-          className="font-garamond italic text-text-secondary mb-4"
+          className="font-quattrocento italic text-text-secondary mb-6"
           style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)' }}
         >
           &ldquo;{paper.masthead_tagline}&rdquo;
-        </p>
-      )}
-
-      {/* Contributors */}
-      {contributors.length > 0 && (
-        <p className="section-header text-text-secondary text-xs mb-5">
-          {contributors.map(c => c.display_name || 'Anonymous').join(' \u00B7 ')}
         </p>
       )}
 

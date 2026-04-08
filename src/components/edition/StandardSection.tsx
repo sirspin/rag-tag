@@ -21,7 +21,7 @@ function SubmissionCard({ submission }: { submission: SubmissionWithUser }) {
         />
       )}
 
-      <h3 className="font-playfair font-bold text-xl text-text-primary leading-tight mb-1">
+      <h3 className="font-quattrocento font-bold text-xl text-text-primary leading-tight mb-1">
         <a
           href={submission.url}
           target="_blank"
@@ -32,14 +32,14 @@ function SubmissionCard({ submission }: { submission: SubmissionWithUser }) {
         </a>
       </h3>
 
-      <p className="font-garamond italic text-text-secondary text-sm mb-3">
+      <p className="font-arvo text-xs text-text-secondary not-italic mb-3">
         by {submission.user?.display_name || 'A contributor'}
         &nbsp;&middot;&nbsp;
-        <span className="font-courier not-italic text-xs">{getSiteName(submission)}</span>
+        <span>{getSiteName(submission)}</span>
       </p>
 
       {submission.note && (
-        <p className="font-garamond italic text-text-secondary text-sm border-l-2 border-rules/40 pl-3 mb-3">
+        <p className="font-quattrocento italic text-text-secondary text-sm border-l-2 border-rules/40 pl-3 mb-3">
           &ldquo;{submission.note}&rdquo;
         </p>
       )}
@@ -67,7 +67,7 @@ export default function StandardSection({
         <p className="section-header text-accent mb-1">{section.title}</p>
         <hr className="rule-thin mb-3" />
         {section.lede && (
-          <p className="font-garamond italic text-text-secondary leading-relaxed">
+          <p className="font-quattrocento italic text-text-secondary leading-relaxed">
             {section.lede}
           </p>
         )}

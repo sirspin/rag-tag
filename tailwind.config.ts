@@ -5,18 +5,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#F5F0E8',
-        'text-primary': '#1A1209',
+        background: '#F2EDE3',
+        'text-primary': '#181008',
         'text-secondary': '#5C4A2A',
         rules: '#2A1F0E',
-        accent: '#8B0000',
-        'link-color': '#1A1209',
+        accent: '#E5243A',
+        'link-color': '#181008',
       },
       fontFamily: {
-        playfair: ['var(--font-playfair)', 'Georgia', 'serif'],
-        lora: ['var(--font-lora)', 'Georgia', 'serif'],
-        garamond: ['var(--font-garamond)', 'Georgia', 'serif'],
-        courier: ['var(--font-courier)', 'Courier New', 'monospace'],
+        quattrocento: ['var(--font-quattrocento)', 'Georgia', 'serif'],
+        arvo: ['var(--font-arvo)', 'Georgia', 'serif'],
+        // backward-compat aliases — existing classes resolve to new fonts
+        playfair: ['var(--font-quattrocento)', 'Georgia', 'serif'],
+        lora: ['var(--font-quattrocento)', 'Georgia', 'serif'],
+        garamond: ['var(--font-quattrocento)', 'Georgia', 'serif'],
+        courier: ['var(--font-arvo)', 'Georgia', 'serif'],
       },
       maxWidth: {
         broadsheet: '1200px',
