@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { AISections, SubmissionWithUser } from '@/types'
 import { getExcerpt } from './extraction'
 
-const SYSTEM_PROMPT = `You are the editorial AI for Commonplace, a collaborative newspaper platform.
+const SYSTEM_PROMPT = `You are the editorial AI for Ragtag, a collaborative newspaper platform.
 Your job is to turn a group of friends' submitted links into a beautifully organized newspaper edition.
 
 Rules:

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import RagtagLogo from '@/components/RagtagLogo'
 import InviteForm from '@/components/forms/InviteForm'
 import type { PaperRow, MembershipRow, SubmissionRow, UserRow, EditionRow } from '@/types'
 
@@ -101,7 +102,7 @@ export default function PaperManagePage({ params }: { params: { id: string } }) 
   return (
     <div className="bg-background min-h-screen">
       <nav className="max-w-broadsheet mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
-        <Link href="/dashboard" className="masthead-name text-2xl">Commonplace</Link>
+        <Link href="/dashboard"><RagtagLogo className="h-7 w-auto" /></Link>
         <div className="flex gap-6 items-center">
           <Link href={`/paper/${paper.id}/submit`} className="font-garamond italic text-text-secondary text-sm hover:text-text-primary">
             Submit a link

@@ -21,11 +21,11 @@ export async function generateMetadata({
     .eq('slug', params.slug)
     .single()
 
-  if (!paper) return { title: 'Commonplace' }
+  if (!paper) return { title: 'Ragtag' }
 
   return {
     title: `${paper.name} — Edition #${params.edition_number}`,
-    description: paper.masthead_tagline || `${paper.name}, a collaborative newspaper on Commonplace.`,
+    description: paper.masthead_tagline || `${paper.name}, a collaborative newspaper on Ragtag.`,
     openGraph: {
       title: `${paper.name} — Edition #${params.edition_number}`,
       description: paper.masthead_tagline || undefined,
@@ -153,7 +153,7 @@ export default async function EditionPage({
               : ''}
           </p>
           <Link href="/" className="font-garamond italic text-text-secondary text-sm hover:text-text-primary">
-            commonplace.is
+            ragtag.is
           </Link>
         </footer>
       </main>

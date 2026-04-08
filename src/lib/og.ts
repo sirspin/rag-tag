@@ -40,7 +40,7 @@ export async function fetchOGMeta(url: string): Promise<OGMeta> {
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Commonplace/1.0; +https://commonplace.is)',
+        'User-Agent': 'Mozilla/5.0 (compatible; Ragtag/1.0; +https://ragtag.is)',
         'Accept': 'text/html',
       },
     })

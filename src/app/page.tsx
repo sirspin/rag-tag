@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import RagtagLogo from '@/components/RagtagLogo'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -7,7 +8,7 @@ export default function LandingPage() {
     <div className="bg-background min-h-screen">
       {/* Nav */}
       <nav className="max-w-broadsheet mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
-        <span className="masthead-name text-2xl">Commonplace</span>
+        <RagtagLogo className="h-7 w-auto" />
         <Link href="/auth/login" className="font-garamond italic text-text-secondary text-sm hover:text-text-primary">
           Sign in
         </Link>
@@ -26,7 +27,7 @@ export default function LandingPage() {
           Every week.
         </h1>
         <p className="font-lora text-lg md:text-xl text-text-secondary max-w-xl mx-auto mb-10 leading-relaxed">
-          Commonplace turns the links your friends share into a newspaper worth reading.
+          Ragtag turns the links your friends share into a newspaper worth reading.
         </p>
         <Link href="/auth/login" className="btn-primary inline-block text-base">
           Start your paper →
@@ -172,7 +173,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t-2 border-rules">
         <div className="max-w-broadsheet mx-auto px-6 md:px-12 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="masthead-name text-xl">Commonplace</span>
+          <RagtagLogo className="h-6 w-auto" />
           <p className="font-garamond italic text-text-secondary text-sm">
             &ldquo;The paper your people make.&rdquo;
           </p>

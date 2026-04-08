@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import RagtagLogo from '@/components/RagtagLogo'
 import type { PaperRow, MembershipRow, SubmissionRow, EditionRow } from '@/types'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
   return (
     <div className="bg-background min-h-screen">
       <nav className="max-w-broadsheet mx-auto px-6 md:px-12 py-5 flex items-center justify-between">
-        <Link href="/" className="masthead-name text-2xl">Commonplace</Link>
+        <Link href="/"><RagtagLogo className="h-7 w-auto" /></Link>
         <form action="/auth/signout" method="post">
           <button className="font-garamond italic text-text-secondary text-sm hover:text-text-primary">
             Sign out

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import RagtagLogo from '@/components/RagtagLogo'
 
 type InviteData = {
   invite: { id: string; paper_id: string; email: string; expires_at: string; claimed_by: string | null }
@@ -127,7 +128,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
-          <h1 className="masthead-name text-4xl mb-4">Commonplace</h1>
+          <div className="flex justify-center mb-4"><RagtagLogo className="h-12 w-auto" /></div>
           <hr className="rule-thin mb-6" />
           <p className="font-garamond italic text-text-secondary text-lg">{error}</p>
         </div>
@@ -139,7 +140,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
-          <h1 className="masthead-name text-4xl mb-6">Commonplace</h1>
+          <div className="flex justify-center mb-6"><RagtagLogo className="h-12 w-auto" /></div>
           <hr className="rule-thin mb-6" />
           <p className="font-garamond italic text-text-secondary text-xl mb-2">
             Check your inbox.
@@ -158,8 +159,8 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     <div className="bg-background min-h-screen flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <div className="text-center mb-10">
-          <h1 className="masthead-name text-4xl mb-2">Commonplace</h1>
-          <p className="font-garamond italic text-text-secondary">
+          <div className="flex justify-center mb-4"><RagtagLogo className="h-12 w-auto" /></div>
+          <p className="font-quattrocento italic text-text-secondary">
             The paper your people make.
           </p>
         </div>

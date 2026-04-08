@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import RagtagLogo from '@/components/RagtagLogo'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -99,8 +100,10 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Masthead */}
         <div className="text-center mb-12">
-          <h1 className="masthead-name text-4xl mb-2">Commonplace</h1>
-          <p className="font-garamond italic text-text-secondary">
+          <div className="flex justify-center mb-4">
+            <RagtagLogo className="h-12 w-auto" />
+          </div>
+          <p className="font-quattrocento italic text-text-secondary">
             The paper your people make.
           </p>
         </div>
