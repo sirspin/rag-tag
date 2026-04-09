@@ -4,7 +4,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 export async function POST(request: NextRequest) {
   try {
   const body = await request.json()
-  const { slug, name, masthead_tagline, cadence, publish_day, publish_time, timezone } = body
+  const { slug, name, masthead_tagline, style, cadence, publish_day, publish_time, timezone } = body
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -23,10 +23,11 @@ export async function POST(request: NextRequest) {
       name,
       masthead_tagline: masthead_tagline || null,
       created_by: user.id,
-      cadence,
-      publish_day,
-      publish_time,
-      timezone,
+      style: style || 'standard',
+      cadence: cadence || 'weekly',
+      publish_day: publish_day ?? 0,
+      publish_time: publish_time || '09:00',
+      timezone: timezone || 'America/New_York',
     })
     .select()
     .single()

@@ -1,47 +1,30 @@
-import type { PaperRow, EditionRow, UserRow } from '@/types'
+import type { PaperRow } from '@/types'
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr)
-  return `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
-}
-
-export default function EditionMasthead({
-  paper,
-  edition,
-  contributors,
-}: {
-  paper: PaperRow
-  edition: EditionRow
-  contributors: Pick<UserRow, 'id' | 'display_name'>[]
-}) {
-  const publishDate = edition.publish_at ? formatDate(edition.publish_at) : formatDate(edition.created_at)
-  const editionBadge = `No. ${String(edition.edition_number).padStart(4, '0')}`
-
-  // contributors prop retained for API compatibility but not rendered
-  void contributors
+export default function LivingPaperMasthead({ paper }: { paper: PaperRow }) {
+  const now = new Date()
+  const dateStr = `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`
 
   return (
     <header className="mb-0">
       {/* Top double rule */}
       <hr className="rule-broadsheet-double mb-0" />
 
-      {/* Top metadata strip — tight Arvo */}
+      {/* Top metadata strip */}
       <div className="flex items-center justify-between py-1 border-b border-rules">
         <p className="font-arvo text-[0.58rem] tracking-[0.18em] uppercase text-text-secondary">
-          Vol. 1 &nbsp;&middot;&nbsp; {publishDate}
+          {dateStr}
         </p>
         <p className="font-arvo text-[0.58rem] tracking-[0.18em] uppercase text-text-secondary">
-          {editionBadge}
+          ragtag.is/p/{paper.slug}
         </p>
       </div>
 
-      {/* Main masthead — full black bar */}
+      {/* Main masthead */}
       <div
         className="bg-text-primary text-background text-center py-4 px-2"
-        style={{ marginLeft: 0, marginRight: 0 }}
       >
         <h1
           className="font-quattrocento font-bold text-background leading-none tracking-tight"
@@ -55,7 +38,7 @@ export default function EditionMasthead({
         </h1>
       </div>
 
-      {/* Tagline strip — below bar, small italic centered */}
+      {/* Tagline strip */}
       {paper.masthead_tagline && (
         <div className="border-b border-rules py-1.5 text-center">
           <p

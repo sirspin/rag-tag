@@ -2,16 +2,18 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import RagtagLogo from '@/components/RagtagLogo'
-import type { PaperRow, MembershipRow, SubmissionRow, EditionRow } from '@/types'
+import type { PaperRow, MembershipRow, UserRow } from '@/types'
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+type StaffReporter = {
+  user: Pick<UserRow, 'id' | 'display_name' | 'avatar_initial' | 'role_title'>
+  membership: MembershipRow
+}
 
 type PaperData = {
   paper: PaperRow
   membership: MembershipRow
-  submissionCount: number
-  latestEdition: EditionRow | null
-  contributorCount: number
+  storyCount: number
+  staff: StaffReporter[]
 }
 
 export default async function DashboardPage() {
@@ -26,26 +28,34 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .eq('status', 'active')
 
-  // Get papers for each membership
   const paperDataList: PaperData[] = []
 
   for (const m of memberships || []) {
-    const [paperRes, submissionsRes, editionsRes, membersRes] = await Promise.all([
+    const [paperRes, storiesRes, staffMembershipsRes] = await Promise.all([
       supabase.from('papers').select('*').eq('id', m.paper_id).single(),
-      supabase.from('submissions').select('id').eq('paper_id', m.paper_id).is('edition_id', null),
-      supabase.from('editions').select('*').eq('paper_id', m.paper_id).order('edition_number', { ascending: false }).limit(1),
-      supabase.from('memberships').select('id').eq('paper_id', m.paper_id).eq('status', 'active'),
+      supabase.from('submissions').select('id').eq('paper_id', m.paper_id),
+      supabase.from('memberships').select('*').eq('paper_id', m.paper_id).eq('status', 'active'),
     ])
 
-    if (paperRes.data) {
-      paperDataList.push({
-        paper: paperRes.data,
-        membership: m,
-        submissionCount: submissionsRes.data?.length || 0,
-        latestEdition: editionsRes.data?.[0] || null,
-        contributorCount: membersRes.data?.length || 0,
-      })
+    if (!paperRes.data) continue
+
+    // Load staff users
+    const staff: StaffReporter[] = []
+    for (const sm of staffMembershipsRes.data || []) {
+      const { data: u } = await supabase
+        .from('users')
+        .select('id, display_name, avatar_initial, role_title')
+        .eq('id', sm.user_id)
+        .single()
+      if (u) staff.push({ user: u, membership: sm })
     }
+
+    paperDataList.push({
+      paper: paperRes.data,
+      membership: m,
+      storyCount: storiesRes.data?.length || 0,
+      staff,
+    })
   }
 
   // Get user profile
@@ -88,77 +98,97 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="space-y-12">
-            {paperDataList.map(({ paper, membership, submissionCount, latestEdition, contributorCount }) => {
-              const editionNum = latestEdition ? latestEdition.edition_number + (latestEdition.status === 'published' ? 1 : 0) : 1
-              const status = latestEdition?.status === 'draft' ? 'draft' : submissionCount > 0 ? 'in_progress' : 'empty'
+            {paperDataList.map(({ paper, membership, storyCount, staff }) => (
+              <div key={paper.id} className="pb-12 border-b border-rules/20">
+                <div className="flex flex-col md:flex-row md:items-start gap-8">
+                  {/* Paper info */}
+                  <div className="flex-1">
+                    <h2 className="masthead-name text-4xl mb-1">{paper.name}</h2>
+                    {paper.masthead_tagline && (
+                      <p className="font-garamond italic text-text-secondary mb-3">&ldquo;{paper.masthead_tagline}&rdquo;</p>
+                    )}
 
-              return (
-                <div key={paper.id} className="pb-12 border-b border-rules/20">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                    {/* Paper info */}
-                    <div className="flex-1">
-                      <p className="edition-badge text-text-secondary mb-1">
-                        {paper.cadence} · {DAYS[paper.publish_day]}s · {contributorCount} {contributorCount === 1 ? 'contributor' : 'contributors'}
+                    {/* Story count + digest */}
+                    <div className="flex flex-wrap gap-4 items-center mb-4">
+                      <p className="font-courier text-xs text-text-secondary uppercase tracking-widest">
+                        {storyCount} {storyCount === 1 ? 'story' : 'stories'} filed
                       </p>
-                      <h2 className="masthead-name text-4xl mb-1">{paper.name}</h2>
-                      {paper.masthead_tagline && (
-                        <p className="font-garamond italic text-text-secondary">&ldquo;{paper.masthead_tagline}&rdquo;</p>
+                      <p className="font-courier text-xs text-text-secondary uppercase tracking-widest">
+                        Weekly edition: {paper.digest_enabled ? 'On' : 'Off'}
+                      </p>
+                      <p className="font-courier text-xs text-text-secondary uppercase tracking-widest">
+                        Style: {paper.style === 'standard' ? 'Standard' : paper.style}
+                      </p>
+                    </div>
+
+                    {/* SMS / Email submission channels */}
+                    <div className="space-y-1 mb-4">
+                      {paper.twilio_number && (
+                        <p className="font-garamond text-sm text-text-primary">
+                          <span className="font-courier text-xs uppercase tracking-widest text-text-secondary mr-2">SMS</span>
+                          File a story: <span className="font-courier">{paper.twilio_number}</span>
+                        </p>
+                      )}
+                      {paper.email_address && (
+                        <p className="font-garamond text-sm text-text-primary">
+                          <span className="font-courier text-xs uppercase tracking-widest text-text-secondary mr-2">Email</span>
+                          File a story: <span className="font-courier">{paper.email_address}</span>
+                        </p>
                       )}
                     </div>
 
-                    {/* Edition status */}
-                    <div className="md:text-right">
-                      <p className="edition-badge text-text-secondary mb-1">
-                        Edition #{String(editionNum).padStart(4, '0')}
-                      </p>
-                      <p className="font-garamond text-text-primary">
-                        {latestEdition?.status === 'draft' ? (
-                          <span className="text-accent italic">Draft — ready to publish</span>
-                        ) : submissionCount > 0 ? (
-                          <span className="italic">In progress — {submissionCount} {submissionCount === 1 ? 'submission' : 'submissions'}</span>
-                        ) : (
-                          <span className="text-text-secondary italic">No submissions yet. The floor is yours.</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-6 flex flex-wrap gap-3 items-center">
-                    {membership.role === 'eic' && (
-                      <>
-                        {latestEdition?.status === 'draft' ? (
-                          <Link href={`/paper/${paper.id}/edition/${latestEdition.id}/preview`} className="btn-primary">
-                            Preview edition →
-                          </Link>
-                        ) : submissionCount > 0 ? (
-                          <Link href={`/paper/${paper.id}`} className="btn-primary">
-                            Compile edition →
-                          </Link>
-                        ) : null}
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-3 items-center mt-4">
+                      <Link href={`/paper/${paper.id}/submit`} className="btn-primary">
+                        File a story →
+                      </Link>
+                      {membership.role === 'eic' && (
                         <Link href={`/paper/${paper.id}`} className="btn-secondary">
                           Manage paper
                         </Link>
-                      </>
-                    )}
-                    {membership.role === 'contributor' && (
-                      <Link href={`/paper/${paper.id}/submit`} className="btn-primary">
-                        Submit a link →
-                      </Link>
-                    )}
-                    {latestEdition?.status === 'published' && (
+                      )}
                       <Link
-                        href={`/p/${paper.slug}/${latestEdition.edition_number}`}
+                        href={`/p/${paper.slug}`}
                         className="font-garamond italic text-text-secondary text-sm hover:text-text-primary"
                         target="_blank"
                       >
-                        View latest edition →
+                        View paper →
                       </Link>
-                    )}
+                    </div>
                   </div>
+
+                  {/* Staff reporters */}
+                  {staff.length > 0 && (
+                    <div className="md:w-56">
+                      <p className="section-header mb-3">Staff Reporters</p>
+                      <hr className="rule-thin mb-3" />
+                      <div className="space-y-2">
+                        {staff.map(({ user: u, membership: sm }) => (
+                          <div key={sm.id} className="flex items-center gap-2">
+                            <div className="w-7 h-7 bg-text-primary text-background flex items-center justify-center font-arvo font-bold text-xs shrink-0">
+                              {u.avatar_initial || u.display_name?.[0]?.toUpperCase() || '?'}
+                            </div>
+                            <div>
+                              <p className="font-garamond text-sm text-text-primary leading-tight">
+                                {u.display_name || '—'}
+                                {sm.role === 'eic' && (
+                                  <span className="font-courier text-[0.6rem] text-accent ml-1">EIC</span>
+                                )}
+                              </p>
+                              {u.role_title && (
+                                <p className="font-courier text-[0.6rem] tracking-wide text-text-secondary uppercase">
+                                  {u.role_title}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )
-            })}
+              </div>
+            ))}
 
             {/* New paper CTA */}
             <div className="pt-4">

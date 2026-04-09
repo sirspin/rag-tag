@@ -240,3 +240,33 @@ create policy "EIC can create editions"
   on public.editions for insert with check (public.is_paper_eic(paper_id));
 create policy "EIC can update editions"
   on public.editions for update using (public.is_paper_eic(paper_id));
+
+-- ─── V2 migrations ───────────────────────────────────────────────────────────
+
+-- papers: living paper fields
+alter table public.papers add column if not exists style          text not null default 'standard';
+alter table public.papers add column if not exists digest_enabled boolean not null default false;
+alter table public.papers add column if not exists twilio_number  text;
+alter table public.papers add column if not exists email_address  text;
+
+-- users: reporter profile fields
+alter table public.users add column if not exists role_title text;
+alter table public.users add column if not exists bio        text;
+
+-- submissions: make all papers public (living paper is always readable)
+drop policy if exists "Paper members can view paper"  on public.papers;
+drop policy if exists "Public papers are viewable"    on public.papers;
+create policy "Public papers are viewable"
+  on public.papers for select using (true);
+
+-- submissions: public view for living paper page
+drop policy if exists "Paper members can view submissions" on public.submissions;
+drop policy if exists "Public can view submissions"        on public.submissions;
+create policy "Public can view submissions"
+  on public.submissions for select using (true);
+
+-- memberships: public view for staff page
+drop policy if exists "Members can view paper memberships" on public.memberships;
+drop policy if exists "Public can view memberships"        on public.memberships;
+create policy "Public can view memberships"
+  on public.memberships for select using (true);

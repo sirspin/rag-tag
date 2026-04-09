@@ -6,6 +6,8 @@ export type UserRow = {
   phone: string | null
   display_name: string | null
   avatar_initial: string | null
+  role_title: string | null
+  bio: string | null
   created_at: string
 }
 
@@ -20,6 +22,10 @@ export type PaperRow = {
   publish_time: string // HH:MM
   timezone: string
   tier: 'free' | 'paid'
+  style: string
+  digest_enabled: boolean
+  twilio_number: string | null
+  email_address: string | null
   created_at: string
 }
 
@@ -95,7 +101,7 @@ export type AISections = {
 // ─── Joined / view types ─────────────────────────────────────────────────────
 
 export type SubmissionWithUser = SubmissionRow & {
-  user: Pick<UserRow, 'id' | 'display_name' | 'avatar_initial'>
+  user: Pick<UserRow, 'id' | 'display_name' | 'avatar_initial' | 'role_title'>
 }
 
 export type PaperWithMembership = PaperRow & {

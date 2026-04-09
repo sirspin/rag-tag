@@ -3,23 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const TIMEZONES = [
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Phoenix',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Singapore',
-  'Australia/Sydney',
-  'Pacific/Auckland',
-]
-
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -34,10 +17,6 @@ export default function PaperForm() {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
   const [tagline, setTagline] = useState('')
-  const [cadence, setCadence] = useState<'weekly' | 'biweekly' | 'monthly'>('weekly')
-  const [publishDay, setPublishDay] = useState(0)
-  const [publishTime, setPublishTime] = useState('09:00')
-  const [timezone, setTimezone] = useState('America/New_York')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -61,10 +40,7 @@ export default function PaperForm() {
         slug,
         name,
         masthead_tagline: tagline,
-        cadence,
-        publish_day: publishDay,
-        publish_time: publishTime,
-        timezone,
+        style: 'standard',
       }),
     })
     const data = await res.json()
@@ -93,7 +69,7 @@ export default function PaperForm() {
         />
         {slug && (
           <p className="font-courier text-xs text-text-secondary mt-2">
-            commonplace.is/p/{slug}/1
+            ragtag.is/p/{slug}
           </p>
         )}
       </div>
@@ -130,59 +106,15 @@ export default function PaperForm() {
 
       <hr className="rule-thin" />
 
-      {/* Cadence */}
+      {/* Style */}
       <div>
-        <label className="section-header block mb-3">Publishing cadence</label>
-        <div className="flex gap-4 flex-wrap">
-          {(['weekly', 'biweekly', 'monthly'] as const).map(c => (
-            <label key={c} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="cadence"
-                value={c}
-                checked={cadence === c}
-                onChange={() => setCadence(c)}
-                className="accent-text-primary"
-              />
-              <span className="font-garamond capitalize">{c}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Publish day + time */}
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <label className="section-header block mb-2">Publish day</label>
-          <select
-            value={publishDay}
-            onChange={e => setPublishDay(Number(e.target.value))}
-            className="input-editorial bg-transparent"
-          >
-            {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
-          </select>
-        </div>
-        <div>
-          <label className="section-header block mb-2">Publish time</label>
-          <input
-            type="time"
-            value={publishTime}
-            onChange={e => setPublishTime(e.target.value)}
-            className="input-editorial font-courier"
-          />
-        </div>
-      </div>
-
-      {/* Timezone */}
-      <div>
-        <label className="section-header block mb-2">Timezone</label>
-        <select
-          value={timezone}
-          onChange={e => setTimezone(e.target.value)}
-          className="input-editorial bg-transparent"
-        >
-          {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz.replace(/_/g, ' ')}</option>)}
+        <label className="section-header block mb-2">Editorial style</label>
+        <select className="input-editorial bg-transparent" disabled>
+          <option value="standard">Standard</option>
         </select>
+        <p className="font-courier text-xs text-text-secondary mt-2">
+          More styles coming soon.
+        </p>
       </div>
 
       {error && (

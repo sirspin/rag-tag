@@ -128,12 +128,12 @@ export default async function PreviewPage({
         )}
       </div>
 
-      <main className="max-w-broadsheet mx-auto px-6 md:px-12 py-8 md:py-12">
+      <main className="max-w-broadsheet mx-auto px-4 md:px-8 pt-4 md:pt-6 pb-0">
         <EditionMasthead paper={paper} edition={edition} contributors={contributors} />
 
         {aiSections.sections.map((section, i) => (
           <div key={i}>
-            <hr className="rule-thick mt-10 mb-0" />
+            <hr className="rule-broadsheet-thick" />
             {section.weight === 'lead' && <LeadSection section={section} submissions={submissions} />}
             {section.weight === 'standard' && <StandardSection section={section} submissions={submissions} />}
             {section.weight === 'brief' && <BriefSection section={section} submissions={submissions} />}
@@ -142,19 +142,24 @@ export default async function PreviewPage({
 
         {aiSections.recommendations?.length > 0 && (
           <>
-            <hr className="rule-thick mt-10" />
+            <hr className="rule-broadsheet-thick" />
             <Recommendations recommendations={aiSections.recommendations} />
           </>
         )}
 
-        <hr className="rule-thick mt-10 mb-6" />
-        <footer className="flex flex-col md:flex-row items-center justify-between gap-4 pb-10">
-          <span className="masthead-name text-xl">{paper.name}</span>
-          <p className="edition-badge text-text-secondary">
-            Edition #{String(edition.edition_number).padStart(4, '0')}
+        <div className="bg-text-primary text-background mt-4 py-2 flex items-center justify-between">
+          <span
+            className="font-quattrocento font-bold text-background"
+            style={{ fontSize: 'clamp(0.9rem, 2vw, 1.2rem)', letterSpacing: '0.04em' }}
+          >
+            {paper.name}
+          </span>
+          <p className="font-arvo text-[0.58rem] tracking-[0.14em] uppercase text-background/70">
+            No. {String(edition.edition_number).padStart(4, '0')}
           </p>
-          <span className="font-garamond italic text-text-secondary text-sm">commonplace.is</span>
-        </footer>
+          <span className="font-arvo text-[0.58rem] tracking-[0.12em] uppercase text-background/60">ragtag.is</span>
+        </div>
+        <div className="pb-6" />
       </main>
     </div>
   )

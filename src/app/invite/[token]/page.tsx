@@ -23,7 +23,6 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
   useEffect(() => {
     async function load() {
-      // 1. Load invite + paper via public service-client API (no auth required)
       const res = await fetch(`/api/invites/${params.token}`)
       const json = await res.json()
 
@@ -35,19 +34,16 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
       setData(json)
 
-      // 2. If already authenticated (returning after magic link), claim immediately
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user && !claimAttempted.current) {
         const savedName = localStorage.getItem('pending_display_name')
         if (savedName !== null) {
-          // Returning after magic link redirect — claim immediately with saved name
           claimAttempted.current = true
-          await callClaimAPI(savedName)
+          await callClaimAPI(savedName, json.invite.paper_id)
           return
         }
-        // Already logged in but arrived directly — show form so they can enter byline
       }
 
       setLoading(false)
@@ -57,7 +53,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.token])
 
-  async function callClaimAPI(name: string) {
+  async function callClaimAPI(name: string, paperId?: string) {
     setClaiming(true)
     const res = await fetch('/api/invites/claim', {
       method: 'POST',
@@ -76,7 +72,8 @@ export default function InvitePage({ params }: { params: { token: string } }) {
       return
     }
 
-    router.push(`/paper/${json.paper_id}/submit`)
+    const pid = json.paper_id || paperId
+    router.push(`/paper/${pid}/onboard`)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,11 +81,10 @@ export default function InvitePage({ params }: { params: { token: string } }) {
     setSending(true)
     setError(null)
 
-    // If already authenticated, claim directly without sending another magic link
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      await callClaimAPI(displayName)
+      await callClaimAPI(displayName, data?.invite.paper_id)
       return
     }
 
@@ -106,7 +102,6 @@ export default function InvitePage({ params }: { params: { token: string } }) {
       return
     }
 
-    // Persist display name — read back after auth redirect
     localStorage.setItem('pending_display_name', displayName)
     localStorage.setItem('pending_invite_token', params.token)
 
@@ -183,7 +178,8 @@ export default function InvitePage({ params }: { params: { token: string } }) {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <p className="font-garamond text-text-secondary">
-            You&rsquo;re joining as a contributor. Your byline appears next to every submission you make.
+            You&rsquo;ve been invited to join <strong className="text-text-primary not-italic">{data?.paper.name}</strong> as a staff reporter.
+            Your byline appears next to every story you file.
           </p>
 
           <div>
@@ -199,7 +195,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
               autoFocus
             />
             <p className="font-courier text-xs text-text-secondary mt-2">
-              This appears next to your submissions in the paper.
+              This appears next to your stories in the paper.
             </p>
           </div>
 

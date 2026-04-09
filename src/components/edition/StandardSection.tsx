@@ -9,42 +9,51 @@ function getSiteName(sub: SubmissionWithUser): string {
 
 function SubmissionCard({ submission }: { submission: SubmissionWithUser }) {
   return (
-    <article>
+    <article className="pt-3 pb-3">
       {submission.og_image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={submission.og_image}
-          alt={submission.og_title || ''}
-          className="w-full h-40 object-cover mb-4"
-          loading="lazy"
-          onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-        />
+        <div className="mb-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={submission.og_image}
+            alt={submission.og_title || ''}
+            className="w-full object-cover"
+            style={{ height: 'clamp(90px, 14vw, 160px)' }}
+            loading="lazy"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+          <p className="broadsheet-caption">{getSiteName(submission)}</p>
+        </div>
       )}
 
-      <h3 className="font-quattrocento font-bold text-xl text-text-primary leading-tight mb-1">
+      <p className="broadsheet-byline">By {submission.user?.display_name ? (submission.user.role_title ? `${submission.user.display_name}, ${submission.user.role_title}` : submission.user.display_name) : 'Staff Reporter'}</p>
+
+      <h3
+        className="headline-standard mb-1"
+        style={{ fontSize: 'clamp(1.1rem, 2.2vw, 1.6rem)' }}
+      >
         <a
           href={submission.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-accent transition-colors"
+          className="hover:opacity-70 transition-opacity"
         >
           {submission.og_title || submission.url}
         </a>
       </h3>
 
-      <p className="font-arvo text-xs text-text-secondary not-italic mb-3">
-        by {submission.user?.display_name || 'A contributor'}
-        &nbsp;&middot;&nbsp;
-        <span>{getSiteName(submission)}</span>
-      </p>
+      {!submission.og_image && (
+        <p className="broadsheet-source mb-1">{getSiteName(submission)}</p>
+      )}
 
       {submission.note && (
-        <p className="font-quattrocento italic text-text-secondary text-sm border-l-2 border-rules/40 pl-3 mb-3">
+        <p className="broadsheet-lede text-[0.72rem] border-t border-rules/40 pt-1.5 mt-1.5">
           &ldquo;{submission.note}&rdquo;
         </p>
       )}
 
-      <SubmissionArticle submission={submission} />
+      <div className="prose-broadsheet mt-2">
+        <SubmissionArticle submission={submission} />
+      </div>
     </article>
   )
 }
@@ -60,43 +69,51 @@ export default function StandardSection({
     .map(id => submissions.find(s => s.id === id))
     .filter((s): s is SubmissionWithUser => s !== undefined)
 
+  const colCount = Math.min(sectionSubmissions.length, 3)
+
   return (
-    <section className="mt-10 mb-0">
-      {/* Section header */}
-      <div className="mb-6">
-        <p className="section-header text-accent mb-1">{section.title}</p>
-        <hr className="rule-thin mb-3" />
-        {section.lede && (
-          <p className="font-quattrocento italic text-text-secondary leading-relaxed">
-            {section.lede}
-          </p>
-        )}
+    <section className="mb-0">
+      {/* Section kicker bar */}
+      <div className="flex items-center gap-0 border-b border-rules mb-0">
+        <span className="section-kicker">{section.title}</span>
       </div>
 
-      {/* Two-column grid */}
+      {/* Multi-column grid with vertical rules */}
       <div
-        className="grid gap-8"
-        style={{
-          gridTemplateColumns: `repeat(${Math.min(sectionSubmissions.length, 2)}, 1fr)`,
-        }}
+        className="grid"
+        style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)`, gap: 0 }}
       >
-        {sectionSubmissions.map((sub, i) => (
+        {sectionSubmissions.slice(0, 3).map((sub, i) => (
           <div
             key={sub.id}
-            className={i > 0 ? 'md:border-l md:border-rules/30 md:pl-8' : ''}
+            className={i > 0 ? 'border-l border-rules pl-3 pr-0' : 'pr-3'}
           >
             <SubmissionCard submission={sub} />
           </div>
         ))}
       </div>
 
-      {/* Overflow submissions — 3rd+ in single column below */}
-      {sectionSubmissions.length > 2 &&
-        sectionSubmissions.slice(2).map(sub => (
-          <div key={sub.id} className="mt-8 pt-8 border-t border-rules/20">
-            <SubmissionCard submission={sub} />
-          </div>
-        ))}
+      {/* Overflow — 4th+ in a horizontal strip below */}
+      {sectionSubmissions.length > 3 && (
+        <div className="border-t border-rules mt-0">
+          {sectionSubmissions.slice(3).map((sub) => (
+            <div key={sub.id} className="py-2 border-b border-rules/40 last:border-0 flex gap-4">
+              <div className="flex-1">
+                <p className="broadsheet-byline">By {sub.user?.display_name ? (sub.user.role_title ? `${sub.user.display_name}, ${sub.user.role_title}` : sub.user.display_name) : 'Staff Reporter'}</p>
+                <h4 className="headline-brief">
+                  <a href={sub.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-70">
+                    {sub.og_title || sub.url}
+                  </a>
+                </h4>
+                {sub.note && (
+                  <p className="broadsheet-lede text-[0.65rem] mt-0.5">{sub.note}</p>
+                )}
+              </div>
+              <p className="broadsheet-source self-start pt-1">{getSiteName(sub)}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

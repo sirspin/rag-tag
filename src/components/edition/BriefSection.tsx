@@ -18,40 +18,50 @@ export default function BriefSection({
     .filter((s): s is SubmissionWithUser => s !== undefined)
 
   return (
-    <section className="mt-10 mb-0 max-w-lg">
-      {/* Section header */}
-      <div className="mb-5">
-        <p className="section-header text-accent mb-1">{section.title}</p>
-        <hr className="rule-thin mb-3" />
-        {section.lede && (
-          <p className="font-quattrocento italic text-text-secondary leading-relaxed">
-            {section.lede}
-          </p>
-        )}
+    <section className="mb-0">
+      {/* Section kicker bar */}
+      <div className="flex items-center gap-0 border-b border-rules mb-0">
+        <span className="section-kicker">{section.title}</span>
       </div>
 
-      {/* Brief items — headline + byline + source only */}
-      <div className="space-y-5">
+      {/* Dense brief list — two columns if 3+ items, single otherwise */}
+      <div
+        className="grid pt-2"
+        style={{
+          gridTemplateColumns: sectionSubmissions.length >= 3 ? '1fr 1fr' : '1fr',
+          gap: 0,
+        }}
+      >
         {sectionSubmissions.map((sub, i) => (
-          <div key={sub.id} className={i > 0 ? 'pt-5 border-t border-rules/20' : ''}>
-            <h3 className="font-quattrocento font-bold text-lg text-text-primary leading-tight mb-1">
-              <a
-                href={sub.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-accent transition-colors"
-              >
-                {sub.og_title || sub.url}
-              </a>
-            </h3>
-            <p className="font-arvo text-xs text-text-secondary not-italic">
-              by {sub.user?.display_name || 'A contributor'}
-              &nbsp;&middot;&nbsp;
-              <span>{getSiteName(sub)}</span>
+          <div
+            key={sub.id}
+            className={[
+              'py-2',
+              'border-b border-rules/60',
+              // Right column items get left border
+              sectionSubmissions.length >= 3 && i % 2 === 1 ? 'pl-3 border-l border-rules' : 'pr-3',
+            ].join(' ')}
+          >
+            {/* Inline source + headline */}
+            <div className="flex items-start gap-2">
+              <span className="broadsheet-source shrink-0 pt-0.5">{getSiteName(sub)}</span>
+              <h3 className="headline-brief leading-tight flex-1">
+                <a
+                  href={sub.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  {sub.og_title || sub.url}
+                </a>
+              </h3>
+            </div>
+            <p className="broadsheet-byline mt-0.5">
+              By {sub.user?.display_name ? (sub.user.role_title ? `${sub.user.display_name}, ${sub.user.role_title}` : sub.user.display_name) : 'Staff Reporter'}
             </p>
             {sub.note && (
-              <p className="font-quattrocento italic text-text-secondary text-sm mt-1">
-                &ldquo;{sub.note}&rdquo;
+              <p className="broadsheet-lede text-[0.68rem] mt-0.5">
+                {sub.note}
               </p>
             )}
           </div>

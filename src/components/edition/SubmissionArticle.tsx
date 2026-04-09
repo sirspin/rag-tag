@@ -13,7 +13,7 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
     const paragraphs = submission.extracted_text.split(/\n\n+/).filter(p => p.trim())
 
     return (
-      <div className="prose-editorial">
+      <div className="prose-broadsheet">
         {paragraphs.map((para, i) => (
           <p key={i}>{para.trim()}</p>
         ))}
@@ -21,9 +21,9 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
           href={submission.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="continue-reading"
+          className="font-arvo text-[0.65rem] tracking-[0.1em] uppercase text-text-secondary hover:text-accent transition-colors block mt-2"
         >
-          Continue reading at {siteName} →
+          ↗ Continue reading at {siteName}
         </a>
       </div>
     )
@@ -33,12 +33,12 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
   return (
     <div>
       {submission.og_description && (
-        <p className="font-quattrocento text-text-secondary leading-relaxed mb-4">
+        <p className="broadsheet-body mb-2">
           {submission.og_description}
         </p>
       )}
       {!submission.og_description && submission.extraction_status === 'paywalled' && (
-        <p className="font-quattrocento italic text-text-secondary mb-4">
+        <p className="broadsheet-lede text-[0.72rem] mb-2">
           This article is behind a paywall.
         </p>
       )}
@@ -46,9 +46,9 @@ export default function SubmissionArticle({ submission }: { submission: Submissi
         href={submission.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="continue-reading"
+        className="font-arvo text-[0.65rem] tracking-[0.1em] uppercase text-text-secondary hover:text-accent transition-colors block mt-1"
       >
-        Read the full story at {siteName} →
+        ↗ Read at {siteName}
       </a>
     </div>
   )

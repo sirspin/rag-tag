@@ -31,7 +31,15 @@ export async function GET(request: NextRequest) {
   } else if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as 'email' })
     if (error) return NextResponse.redirect(new URL('/auth/login?error=auth_failed', request.url))
+  } else {
+    return NextResponse.redirect(new URL('/auth/login?error=auth_failed', request.url))
   }
 
-  return NextResponse.redirect(new URL(redirect, request.url))
+  // Forward any auth cookies onto the redirect response so the session
+  // is visible to the middleware on the very next request.
+  const redirectResponse = NextResponse.redirect(new URL(redirect, request.url))
+  cookieStore.getAll().forEach(cookie => {
+    redirectResponse.cookies.set(cookie.name, cookie.value)
+  })
+  return redirectResponse
 }

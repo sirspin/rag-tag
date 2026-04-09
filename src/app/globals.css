@@ -226,3 +226,210 @@ a:hover {
     margin-left: 0;
   }
 }
+
+/* ============================================
+   BROADSHEET DENSITY STYLES
+   ============================================ */
+
+/* Black-bar reversed treatment */
+.broadsheet-bar {
+  background: var(--text-primary);
+  color: var(--background);
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-arvo), Georgia, serif;
+  font-weight: 700;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.broadsheet-bar-full {
+  background: var(--text-primary);
+  color: var(--background);
+  padding: 0.4rem 0;
+  font-family: var(--font-arvo), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  display: block;
+}
+
+/* Dense column grid — no gap, rules only */
+.broadsheet-grid {
+  display: grid;
+  gap: 0;
+}
+
+/* Broadsheet column — separated by 1px rule */
+.broadsheet-col {
+  border-left: 1px solid var(--rules);
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+.broadsheet-col:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+
+/* Section kicker — inline black box label */
+.section-kicker {
+  font-family: var(--font-arvo), Georgia, serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: var(--text-primary);
+  color: var(--background);
+  padding: 0.15rem 0.4rem;
+  display: inline-block;
+  margin-bottom: 0.35rem;
+}
+
+/* Dense headline styles */
+.headline-lead {
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.headline-standard {
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-weight: 700;
+  line-height: 1.0;
+  color: var(--text-primary);
+}
+
+.headline-brief {
+  font-family: var(--font-arvo), Georgia, serif;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+}
+
+/* Dense body text — tight, small */
+.broadsheet-body {
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Byline — Arvo tight */
+.broadsheet-byline {
+  font-family: var(--font-arvo), Georgia, serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+/* Rule styles for broadsheet */
+.rule-broadsheet {
+  border: none;
+  border-top: 1px solid var(--rules);
+  margin: 0;
+}
+
+.rule-broadsheet-thick {
+  border: none;
+  border-top: 3px solid var(--rules);
+  margin: 0;
+}
+
+.rule-broadsheet-double {
+  border: none;
+  border-top: 3px solid var(--rules);
+  border-bottom: 1px solid var(--rules);
+  padding-top: 2px;
+  margin: 0;
+}
+
+/* Decorative corner ornament */
+.ornament::before {
+  content: '✦';
+  font-size: 0.5rem;
+  color: var(--text-secondary);
+  margin-right: 0.4rem;
+  opacity: 0.7;
+}
+
+/* Bordered callout box */
+.broadsheet-box {
+  border: 1px solid var(--rules);
+  padding: 0.75rem;
+}
+
+/* Reversed callout box */
+.broadsheet-box-reversed {
+  background: var(--text-primary);
+  color: var(--background);
+  padding: 0.75rem;
+}
+
+/* Lede / deck text */
+.broadsheet-lede {
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-style: italic;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Photo caption */
+.broadsheet-caption {
+  font-family: var(--font-arvo), Georgia, serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+  font-style: italic;
+}
+
+/* Source attribution */
+.broadsheet-source {
+  font-family: var(--font-arvo), Georgia, serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Prose body for broadsheet — tight, justified */
+.prose-broadsheet p {
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  margin-bottom: 0.65em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.prose-broadsheet p:first-child::first-letter {
+  float: left;
+  font-family: var(--font-quattrocento), Georgia, serif;
+  font-size: 3.2em;
+  line-height: 0.78;
+  padding-right: 0.06em;
+  padding-top: 0.08em;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Increase grain texture for more aged look */
+body::before {
+  opacity: 0.055 !important;
+}

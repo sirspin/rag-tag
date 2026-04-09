@@ -18,7 +18,7 @@ export default function NewPaperPage() {
             Start your paper.
           </h1>
           <p className="font-garamond italic text-text-secondary text-lg">
-            Give it a name, set your cadence, and invite your contributors.
+            Give it a name and invite your staff reporters.
           </p>
         </div>
 

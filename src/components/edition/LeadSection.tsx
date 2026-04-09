@@ -21,98 +21,110 @@ export default function LeadSection({
   const [primary, ...secondary] = sectionSubmissions
 
   return (
-    <section className="mt-10 mb-0">
-      {/* Section header */}
-      <div className="mb-6">
-        <p className="section-header text-accent mb-1">{section.title}</p>
-        <hr className="rule-thin mb-3" />
-        {section.lede && (
-          <p className="font-quattrocento italic text-text-secondary text-lg leading-relaxed">
-            {section.lede}
-          </p>
-        )}
+    <section className="mb-0">
+      {/* Section kicker bar */}
+      <div className="flex items-center gap-0 border-b border-rules mb-0">
+        <span className="section-kicker">{section.title}</span>
       </div>
 
-      {/* Primary article — full width */}
+      {/* Lead layout: large primary left, secondary stack right */}
       {primary && (
-        <article className="mb-10">
-          {/* OG image */}
-          {primary.og_image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={primary.og_image}
-              alt={primary.og_title || ''}
-              className="w-full h-72 md:h-96 object-cover mb-6"
-              loading="lazy"
-              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
-          )}
-
-          {/* Headline */}
-          <h2
-            className="font-quattrocento font-bold text-text-primary leading-tight mb-2"
-            style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}
-          >
-            <a
-              href={primary.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-accent transition-colors"
-            >
-              {primary.og_title || primary.url}
-            </a>
-          </h2>
-
-          {/* Byline */}
-          <p className="font-arvo text-xs text-text-secondary not-italic mb-4">
-            by {primary.user?.display_name || 'A contributor'}
-            &nbsp;&middot;&nbsp;
-            <span>{getSiteName(primary)}</span>
-          </p>
-
-          {/* Pull quote — contributor's note */}
-          {primary.note && (
-            <blockquote className="pull-quote">
-              &ldquo;{primary.note}&rdquo;
-            </blockquote>
-          )}
-
-          {/* Article text */}
-          <SubmissionArticle submission={primary} />
-        </article>
-      )}
-
-      {/* Secondary lead submissions (if any) */}
-      {secondary.length > 0 && (
-        <div className="grid md:grid-cols-2 gap-8 pt-4 border-t border-rules/20">
-          {secondary.map(sub => (
-            <article key={sub.id}>
-              {sub.og_image && (
-                // eslint-disable-next-line @next/next/no-img-element
+        <div
+          className="grid"
+          style={{
+            gridTemplateColumns: secondary.length > 0 ? '2fr 1fr' : '1fr',
+            gap: 0,
+          }}
+        >
+          {/* Primary — large left column */}
+          <article className="pr-4 border-r border-rules pt-3 pb-4">
+            {primary.og_image && (
+              <div className="mb-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={sub.og_image}
-                  alt={sub.og_title || ''}
-                  className="w-full h-48 object-cover mb-4"
+                  src={primary.og_image}
+                  alt={primary.og_title || ''}
+                  className="w-full object-cover"
+                  style={{ height: 'clamp(160px, 22vw, 320px)' }}
                   loading="lazy"
                   onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
-              )}
-              <h3 className="font-quattrocento font-bold text-xl text-text-primary leading-tight mb-1">
-                <a href={sub.url} target="_blank" rel="noopener noreferrer" className="hover:text-accent">
-                  {sub.og_title || sub.url}
-                </a>
-              </h3>
-              <p className="font-arvo text-xs text-text-secondary not-italic mb-3">
-                by {sub.user?.display_name || 'A contributor'}
+                <p className="broadsheet-caption">{getSiteName(primary)}</p>
+              </div>
+            )}
+
+            <p className="broadsheet-byline">By {primary.user?.display_name ? (primary.user.role_title ? `${primary.user.display_name}, ${primary.user.role_title}` : primary.user.display_name) : 'Staff Reporter'}</p>
+
+            <h2
+              className="headline-lead mb-2"
+              style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.5rem)' }}
+            >
+              <a
+                href={primary.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-70 transition-opacity"
+              >
+                {primary.og_title || primary.url}
+              </a>
+            </h2>
+
+            {primary.note && (
+              <p className="broadsheet-lede border-t border-rules pt-2 mt-2 mb-3">
+                &ldquo;{primary.note}&rdquo;
               </p>
-              {sub.note && (
-                <p className="font-quattrocento italic text-text-secondary text-sm border-l-2 border-accent pl-3 mb-3">
-                  &ldquo;{sub.note}&rdquo;
-                </p>
-              )}
-              <SubmissionArticle submission={sub} />
-            </article>
-          ))}
+            )}
+
+            <div className="prose-broadsheet">
+              <SubmissionArticle submission={primary} />
+            </div>
+          </article>
+
+          {/* Secondary — stacked right column */}
+          {secondary.length > 0 && (
+            <div className="pl-3 pt-3 flex flex-col gap-0">
+              {secondary.map((sub, i) => (
+                <article
+                  key={sub.id}
+                  className={i > 0 ? 'pt-3 border-t border-rules mt-3' : ''}
+                >
+                  {sub.og_image && (
+                    <div className="mb-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={sub.og_image}
+                        alt={sub.og_title || ''}
+                        className="w-full object-cover"
+                        style={{ height: 'clamp(90px, 12vw, 150px)' }}
+                        loading="lazy"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
+                  )}
+                  <p className="broadsheet-byline">By {sub.user?.display_name ? (sub.user.role_title ? `${sub.user.display_name}, ${sub.user.role_title}` : sub.user.display_name) : 'Staff Reporter'}</p>
+                  <h3
+                    className="headline-standard mb-1"
+                    style={{ fontSize: 'clamp(1rem, 2vw, 1.35rem)' }}
+                  >
+                    <a
+                      href={sub.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:opacity-70 transition-opacity"
+                    >
+                      {sub.og_title || sub.url}
+                    </a>
+                  </h3>
+                  {sub.note && (
+                    <p className="broadsheet-lede text-[0.72rem] mt-1">
+                      {sub.note}
+                    </p>
+                  )}
+                  <p className="broadsheet-source mt-1">{getSiteName(sub)}</p>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </section>
