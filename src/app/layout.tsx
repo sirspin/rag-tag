@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Quattrocento, Arvo, Fraunces } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const quattrocento = Quattrocento({
@@ -41,7 +42,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${quattrocento.variable} ${arvo.variable} ${fraunces.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
