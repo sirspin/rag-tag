@@ -73,23 +73,12 @@ export default async function LivingPaperPage({
     })
   }
 
-  // Get latest published edition's AI sections for organization (optional)
-  const { data: latestEdition } = await supabase
-    .from('editions')
-    .select('ai_sections')
-    .eq('paper_id', paper.id)
-    .eq('status', 'published')
-    .order('edition_number', { ascending: false })
-    .limit(1)
-    .single()
-
-  const aiSections = latestEdition?.ai_sections as AISections | null | undefined
-
-  // Only use AI sections if they reference submissions that still exist
+  // Use paper's own AI sections (updated whenever a story is filed)
+  const paperAISections = paper.ai_sections as AISections | null | undefined
   const submissionIds = new Set(submissions.map(s => s.id))
-  const validSections = aiSections?.sections?.filter(
+  const validSections = (paperAISections?.sections || []).filter(
     s => s.submission_ids.some(id => submissionIds.has(id))
-  ) || []
+  )
 
   return (
     <div className="bg-background min-h-screen">

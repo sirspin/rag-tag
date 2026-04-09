@@ -4,8 +4,6 @@ import { useState, useRef } from 'react'
 import OGCard from '@/components/ui/OGCard'
 import type { OGMeta, PaperRow } from '@/types'
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
 export default function SubmissionForm({ paper, defaultUrl }: { paper: PaperRow; defaultUrl?: string }) {
   const [url, setUrl] = useState(defaultUrl || '')
   const [note, setNote] = useState('')
@@ -68,21 +66,19 @@ export default function SubmissionForm({ paper, defaultUrl }: { paper: PaperRow;
   }
 
   if (submitted) {
-    const nextPublish = DAYS[paper.publish_day]
     return (
       <div className="text-center py-10">
         <hr className="rule-thin mb-8" />
-        <p className="font-playfair font-bold text-2xl text-text-primary mb-3">Added.</p>
+        <p className="font-quattrocento font-bold text-2xl text-text-primary mb-3">Filed.</p>
         <p className="font-garamond italic text-text-secondary text-lg">
-          Your link is in the pile for {paper.name}.<br />
-          Edition publishes on {nextPublish}.
+          Your story is in {paper.name}.
         </p>
         <hr className="rule-thin mt-8 mb-8" />
         <button
           onClick={() => { setSubmitted(false); setUrl(''); setNote(''); setMeta(null); fetchedUrlRef.current = '' }}
           className="font-garamond italic text-text-secondary text-sm hover:text-text-primary"
         >
-          Submit another link →
+          File another story →
         </button>
       </div>
     )
@@ -133,7 +129,7 @@ export default function SubmissionForm({ paper, defaultUrl }: { paper: PaperRow;
       {error && <p className="font-garamond italic text-accent">{error}</p>}
 
       <button type="submit" disabled={submitting || !url} className="btn-primary w-full">
-        {submitting ? 'Submitting…' : `Add to ${paper.name} →`}
+        {submitting ? 'Filing…' : `File to ${paper.name} →`}
       </button>
     </form>
   )

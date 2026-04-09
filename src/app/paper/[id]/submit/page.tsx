@@ -46,7 +46,7 @@ export default async function SubmitPage({
 
       <main className="max-w-lg mx-auto px-6 py-12">
         <div className="mb-10">
-          <h1 className="masthead-name text-4xl mb-2">Submit a link.</h1>
+          <h1 className="masthead-name text-4xl mb-2">File a story.</h1>
           <p className="font-garamond italic text-text-secondary">
             Share something worth reading.
           </p>

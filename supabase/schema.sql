@@ -248,6 +248,7 @@ alter table public.papers add column if not exists style          text not null 
 alter table public.papers add column if not exists digest_enabled boolean not null default false;
 alter table public.papers add column if not exists twilio_number  text;
 alter table public.papers add column if not exists email_address  text;
+alter table public.papers add column if not exists ai_sections    jsonb;
 
 -- users: reporter profile fields
 alter table public.users add column if not exists role_title text;

@@ -41,9 +41,6 @@ export default function Recommendations({ recommendations }: { recommendations: 
                 {rec.title}
               </a>
             </h4>
-            <p className="broadsheet-lede text-[0.68rem]">
-              {rec.reason}
-            </p>
           </div>
         ))}
       </div>

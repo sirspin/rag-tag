@@ -54,5 +54,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save submission.' }, { status: 500 })
   }
 
+  // Trigger AI re-organization in the background (fire and forget)
+  const organizeUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/papers/${paper_id}/organize`
+  fetch(organizeUrl, { method: 'POST' }).catch(() => {/* ignore errors */})
+
   return NextResponse.json({ success: true, submission })
 }

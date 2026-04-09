@@ -26,6 +26,7 @@ export type PaperRow = {
   digest_enabled: boolean
   twilio_number: string | null
   email_address: string | null
+  ai_sections: AISections | null
   created_at: string
 }
 
