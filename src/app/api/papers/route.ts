@@ -6,6 +6,13 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { slug, name, masthead_tagline, style, cadence, publish_day, publish_time, timezone } = body
 
+  if (!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return NextResponse.json(
+      { error: 'Slug must contain only lowercase letters, numbers, and hyphens.' },
+      { status: 400 }
+    )
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated.' }, { status: 401 })

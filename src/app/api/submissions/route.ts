@@ -56,7 +56,10 @@ export async function POST(request: NextRequest) {
 
   // Trigger AI re-organization in the background (fire and forget)
   const organizeUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/papers/${paper_id}/organize`
-  fetch(organizeUrl, { method: 'POST' }).catch(() => {/* ignore errors */})
+  fetch(organizeUrl, {
+    method: 'POST',
+    headers: { 'x-internal-secret': process.env.INTERNAL_API_SECRET || '' },
+  }).catch(() => {/* ignore errors */})
 
   return NextResponse.json({ success: true, submission })
 }
