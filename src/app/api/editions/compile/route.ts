@@ -63,13 +63,13 @@ export async function POST(request: NextRequest) {
   for (const sub of rawSubmissions) {
     const { data: userRow } = await serviceSupabase
       .from('users')
-      .select('id, display_name, avatar_initial')
+      .select('id, display_name, avatar_initial, role_title')
       .eq('id', sub.user_id)
       .single()
 
     submissions.push({
       ...sub,
-      user: userRow || { id: sub.user_id, display_name: null, avatar_initial: null },
+      user: userRow || { id: sub.user_id, display_name: null, avatar_initial: null, role_title: null },
     })
   }
 
